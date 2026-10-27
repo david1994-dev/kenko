@@ -109,11 +109,11 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
           <ul className="mt-5 flex flex-col gap-3 border-t border-line pt-4 text-sm">
             <li className="flex items-center gap-3">
               <TruckIcon size={22} className="shrink-0 text-teal" />
-              Giao hàng toàn quốc · [Thời gian dự kiến]
+              Ship hoả tốc · Kiểm tra, test hàng trước khi nhận
             </li>
             <li className="flex items-center gap-3">
               <ShieldIcon size={22} className="shrink-0 text-teal" />
-              Bảo hành [Thời gian] · Đổi trả [Điều kiện]
+              Bảo hành 12 tháng · Đổi trả [Điều kiện]
             </li>
             <li className="flex items-center gap-3">
               <ChatIcon size={22} className="shrink-0 text-teal" />

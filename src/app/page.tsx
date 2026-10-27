@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BestSellers } from "@/components/best-sellers";
-import { ChevronRightIcon, ShieldIcon, TruckIcon, WindIcon } from "@/components/icons";
+import { ChevronRightIcon } from "@/components/icons";
+import { TrustBanner } from "@/components/trust-banner";
 import { ButtonLink, Container, ImagePlaceholder, SectionHeading } from "@/components/ui";
 import { articles, howItWorks, industries } from "@/data/content";
 import { categories, products } from "@/data/catalog";
@@ -13,12 +14,6 @@ export const metadata: Metadata = {
   description: site.description,
   alternates: { canonical: "/" },
 };
-
-const trust = [
-  { icon: WindIcon, label: "Làm mát chủ động" },
-  { icon: ShieldIcon, label: "Bảo hành chính hãng" },
-  { icon: TruckIcon, label: "Giao hàng toàn quốc" },
-];
 
 const bestSellerTabs = [
   { id: "dai-tay", label: "Dài tay" },
@@ -35,6 +30,7 @@ const bestSellerTabs = [
 export default function HomePage() {
   return (
     <>
+      <TrustBanner />
       <section className="bg-navy text-white">
         <Container className="flex flex-col gap-8 py-6 md:flex-row md:items-center md:gap-12 md:py-14">
           <div className="md:flex-1">
@@ -57,7 +53,7 @@ export default function HomePage() {
                 variant="outline-light"
                 className="flex-1 md:flex-none md:px-8"
               >
-                Tư vấn chọn size
+                Tư vấn size
               </ButtonLink>
             </div>
           </div>
@@ -81,17 +77,6 @@ export default function HomePage() {
             </Link>
           ))}
         </div>
-      </Container>
-
-      <Container className="py-4 md:py-6">
-        <ul className="grid grid-cols-3 gap-1 rounded-xl bg-ground px-2 py-3.5 text-center">
-          {trust.map(({ icon: Icon, label }) => (
-            <li key={label} className="flex flex-col items-center gap-1.5 text-teal">
-              <Icon size={28} strokeWidth={1.8} />
-              <span className="text-xs font-semibold leading-tight text-ink md:text-sm">{label}</span>
-            </li>
-          ))}
-        </ul>
       </Container>
 
       <Container className="py-2 md:py-4">

@@ -68,6 +68,9 @@ export const WindIcon = (p: IconProps) => (
 export const FilterIcon = (p: IconProps) => (
   <Icon {...p}><path d="M4 6h16M7 12h10M10 18h4" /></Icon>
 );
-export const CheckIcon = (p: IconProps) => (
+export const BoltIcon = (p: IconProps) => (
+  <Icon {...p}><path d="M13 2L4 14h7l-1 8 9-12h-7z" /></Icon>
+);
+export const CheckIcon =(p: IconProps) => (
   <Icon {...p}><path d="M5 12l5 5 9-10" /></Icon>
 );

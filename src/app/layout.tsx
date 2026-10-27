@@ -39,9 +39,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="vi" className={beVietnam.variable}>
       <body className="flex min-h-screen flex-col pb-[68px] md:pb-0">
-        <div className="bg-mist px-4 py-2 text-center text-[13px] font-semibold text-navy">
-          Kiểm tra hàng khi nhận · Bảo hành chính hãng
-        </div>
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
