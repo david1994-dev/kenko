@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createOrder, OrderError } from "@/lib/orders";
 
 export type OrderFormState = {
-  errors?: Partial<Record<"name" | "phone" | "province" | "district" | "address" | "note", string>>;
+  errors?: Partial<Record<"name" | "phone" | "address" | "note", string>>;
   message?: string;
   values?: Record<string, string>;
 };
@@ -17,8 +17,6 @@ const schema = z.object({
     .string()
     .transform((v) => v.replace(/[\s.\-()]/g, "").replace(/^\+84/, "0"))
     .pipe(z.string().regex(/^0\d{9,10}$/, "Số điện thoại chưa đúng.")),
-  province: z.string().trim().max(80, "Quá dài."),
-  district: z.string().trim().max(120, "Quá dài."),
   address: z.string().trim().min(5, "Vui lòng nhập địa chỉ nhận hàng.").max(200, "Địa chỉ quá dài."),
   note: z.string().trim().max(500, "Ghi chú tối đa 500 ký tự."),
 });
@@ -32,7 +30,7 @@ const text = (data: FormData, key: string) => String(data.get(key) ?? "");
 
 export async function placeOrder(_prev: OrderFormState, data: FormData): Promise<OrderFormState> {
   const values = Object.fromEntries(
-    ["name", "phone", "province", "district", "address", "note"].map((k) => [k, text(data, k)]),
+    ["name", "phone", "address", "note"].map((k) => [k, text(data, k)]),
   );
 
   // Ô ẩn dành cho bot: người thật không nhìn thấy nên không điền.
@@ -57,7 +55,7 @@ export async function placeOrder(_prev: OrderFormState, data: FormData): Promise
 
   let result;
   try {
-    result = await createOrder({ ...parsed.data, items });
+    result = await createOrder({ ...parsed.data, province: "", district: "", items });
   } catch (e) {
     if (e instanceof OrderError) return { values, message: e.message };
     console.error(e);

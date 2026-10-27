@@ -47,6 +47,8 @@ export default async function Page({ params }: PageProps<"/admin/products/[id]">
             description: product.description,
             price: product.price,
             salePrice: product.salePrice,
+            soldCount: product.soldCount,
+            giftNote: product.giftNote,
             status: product.status,
           }}
         />

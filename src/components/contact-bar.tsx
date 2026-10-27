@@ -13,7 +13,7 @@ export function ContactBar() {
   return (
     <nav
       aria-label="Liên hệ nhanh"
-      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-3 gap-2 border-t border-line bg-white px-3 py-2 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-2 gap-2 border-t border-line bg-white px-3 py-2 md:hidden"
     >
       <a
         href={site.hotlineHref}
@@ -27,12 +27,6 @@ export function ContactBar() {
         className="flex h-11 items-center justify-center rounded-lg bg-teal text-sm font-bold text-white"
       >
         Zalo
-      </a>
-      <a
-        href={site.messengerHref}
-        className="flex h-11 items-center justify-center rounded-lg bg-ink text-sm font-bold text-white"
-      >
-        Messenger
       </a>
     </nav>
   );

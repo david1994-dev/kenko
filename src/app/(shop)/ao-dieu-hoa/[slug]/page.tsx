@@ -48,8 +48,7 @@ async function Content({ params }: Pick<PageProps<"/ao-dieu-hoa/[slug]">, "param
       chips={[
         { label: "Tất cả", href: "/ao-dieu-hoa" },
         { label: "Dài tay", href: "/ao-dieu-hoa/dai-tay", active: cat.slug === "dai-tay" },
-        { label: "Ngắn tay", href: "/ao-dieu-hoa/ngan-tay", active: cat.slug === "ngan-tay" },
-        { label: "Phụ kiện", href: "/phu-kien" },
+        { label: "Ngắn tay + Gile", href: "/ao-dieu-hoa/ngan-tay", active: cat.slug === "ngan-tay" },
       ]}
       seoText={cat.seoText}
     />

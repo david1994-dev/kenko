@@ -1,0 +1,1 @@
+ALTER TABLE "products" ADD COLUMN "gift_note" text DEFAULT '' NOT NULL;

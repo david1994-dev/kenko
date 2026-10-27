@@ -5,10 +5,13 @@ import { Suspense } from "react";
 import { PageSkeleton } from "@/components/page-skeleton";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { BuyBox } from "@/components/buy-box";
-import { ChatIcon, ChevronDownIcon, ShieldIcon, TruckIcon } from "@/components/icons";
+import { ChatIcon, CheckIcon, ChevronDownIcon, GiftIcon, ShieldIcon, TruckIcon } from "@/components/icons";
 import { JsonLd } from "@/components/json-ld";
 import { Container, DiscountBadge, ImagePlaceholder, Price, ProductCard, SectionHeading } from "@/components/ui";
-import { getProduct, getProducts } from "@/lib/catalog";
+import { getProduct, getProductReviews, getProducts } from "@/lib/catalog";
+import { RatingLine, Stars } from "@/components/stars";
+import { formatRating, maskName } from "@/lib/format";
+import Link from "next/link";
 import { currentPrice } from "@/lib/price";
 import { absoluteUrl, site } from "@/lib/site";
 
@@ -66,6 +69,7 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
   const { slug } = await params;
   const [product, all] = await Promise.all([getProduct(slug), getProducts()]);
   if (!product) notFound();
+  const reviews = await getProductReviews(product.id);
 
   const others = all.filter((p) => p.slug !== product.slug);
   const related = [...others.filter((p) => p.category === product.category), ...others.filter((p) => p.category !== product.category)].slice(0, 4);
@@ -119,8 +123,11 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
 
         <div>
           <h1 className="mb-1.5 text-[22px] font-extrabold leading-snug md:text-[28px]">{product.name}</h1>
-          <p className="mb-2.5 text-[13px] text-subtle">
-            Mã: {product.sku} · Đã bán {product.sold}
+          <p className="mb-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-subtle">
+            {product.rating && <RatingLine rating={product.rating} />}
+            <span>
+              Mã: {product.sku} · Đã bán {product.sold}
+            </span>
           </p>
           <div className="mb-4">
             <Price product={product} size="lg" />
@@ -128,14 +135,28 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
 
           <BuyBox product={product} />
 
+          {product.giftNote && (
+            <div className="mt-4 flex gap-3 rounded-xl border border-brand-deep bg-mist p-3">
+              <GiftIcon size={24} className="mt-0.5 shrink-0 text-price" />
+              <div>
+                <div className="text-sm font-bold">Quà tặng miễn phí</div>
+                <p className="whitespace-pre-line text-sm text-muted">{product.giftNote}</p>
+              </div>
+            </div>
+          )}
+
           <ul className="mt-5 flex flex-col gap-3 border-t border-line pt-4 text-sm">
             <li className="flex items-center gap-3">
               <TruckIcon size={22} className="shrink-0 text-teal" />
-              Ship hoả tốc · Kiểm tra, test hàng trước khi nhận
+              Miễn phí vận chuyển · Ship hoả tốc
+            </li>
+            <li className="flex items-center gap-3">
+              <CheckIcon size={22} className="shrink-0 text-teal" />
+              Kiểm tra, test hàng chính hãng trước khi thanh toán (COD)
             </li>
             <li className="flex items-center gap-3">
               <ShieldIcon size={22} className="shrink-0 text-teal" />
-              Bảo hành 12 tháng · Đổi trả [Điều kiện]
+              Bảo hành 12 tháng
             </li>
             <li className="flex items-center gap-3">
               <ChatIcon size={22} className="shrink-0 text-teal" />
@@ -150,30 +171,42 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
           <Accordion title="Mô tả sản phẩm" open>
             <p>{product.description}</p>
           </Accordion>
-          {product.specs.length > 0 && (
-            <Accordion title="Thông số">
-              <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-1">
-                {product.specs.map((s) => (
-                  <div key={s.label} className="contents">
-                    <dt className="font-semibold text-ink">{s.label}</dt>
-                    <dd>{s.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </Accordion>
+        </div>
+      </Container>
+
+      <Container className="pt-8">
+        <div className="max-w-3xl">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-lg font-bold md:text-2xl md:font-extrabold">Đánh giá của khách hàng</h2>
+            <Link href="/danh-gia" className="flex min-h-11 items-center text-sm font-semibold text-teal underline">
+              Đã mua hàng? Viết đánh giá
+            </Link>
+          </div>
+          {product.rating ? (
+            <div className="mb-4 flex items-center gap-3 rounded-xl bg-ground p-3">
+              <span className="text-3xl font-extrabold">{formatRating(product.rating.avg)}</span>
+              <div>
+                <Stars value={product.rating.avg} size={20} />
+                <div className="text-[13px] text-subtle">{product.rating.count} đánh giá từ khách đã mua</div>
+              </div>
+            </div>
+          ) : (
+            <p className="mb-4 text-sm text-muted">Chưa có đánh giá. Đánh giá chỉ nhận từ khách đã nhận hàng.</p>
           )}
-          {product.faqs.length > 0 && (
-            <Accordion title="Câu hỏi thường gặp">
-              <dl className="space-y-3">
-                {product.faqs.map((f) => (
-                  <div key={f.q}>
-                    <dt className="font-semibold text-ink">{f.q}</dt>
-                    <dd>{f.a}</dd>
-                  </div>
-                ))}
-              </dl>
-            </Accordion>
-          )}
+          <ul className="divide-y divide-line">
+            {reviews.map((r) => (
+              <li key={r.id} className="py-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-semibold">{maskName(r.authorName)}</span>
+                  <Stars value={r.rating} size={14} />
+                  <span className="text-xs text-subtle">
+                    {new Date(r.createdAt).toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
+                  </span>
+                </div>
+                {r.comment && <p className="mt-1 whitespace-pre-line text-sm text-muted">{r.comment}</p>}
+              </li>
+            ))}
+          </ul>
         </div>
       </Container>
 
@@ -195,6 +228,17 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
           sku: product.sku,
           category: product.categoryName,
           image: product.images.map((i) => i.url),
+          ...(product.rating
+            ? {
+                aggregateRating: {
+                  "@type": "AggregateRating",
+                  ratingValue: Number(product.rating.avg.toFixed(1)),
+                  reviewCount: product.rating.count,
+                  bestRating: 5,
+                  worstRating: 1,
+                },
+              }
+            : {}),
           brand: { "@type": "Brand", name: site.name },
           offers: {
             "@type": "Offer",
@@ -206,19 +250,6 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
           },
         }}
       />
-      {product.faqs.length > 0 && (
-        <JsonLd
-          data={{
-            "@context": "https://schema.org",
-            "@type": "FAQPage",
-            mainEntity: product.faqs.map((f) => ({
-              "@type": "Question",
-              name: f.q,
-              acceptedAnswer: { "@type": "Answer", text: f.a },
-            })),
-          }}
-        />
-      )}
     </>
   );
 }

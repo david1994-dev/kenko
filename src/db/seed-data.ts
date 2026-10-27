@@ -23,7 +23,7 @@ export const categories: SeedCategory[] = [
     title: "Áo điều hoà",
     href: "/ao-dieu-hoa",
     description:
-      "Áo điều hoà KENKO làm mát chủ động cho người làm việc ngoài trời và trong nhà xưởng. Áo dài tay, ngắn tay, nhiều màu, nhiều size.",
+      "Áo điều hoà KENKO làm mát chủ động cho người làm việc ngoài trời và trong nhà xưởng. Gồm 2 loại: áo dài tay, và ngắn tay + gile. Nhiều màu, nhiều size.",
     seoText: "[Đoạn nội dung SEO 100–150 chữ: áo điều hoà là gì, ai nên dùng, cách chọn size và pin.]",
   },
   {
@@ -39,12 +39,12 @@ export const categories: SeedCategory[] = [
   {
     id: "ngan-tay",
     parent: "ao-dieu-hoa",
-    name: "Áo ngắn tay",
-    title: "Áo điều hoà ngắn tay",
+    name: "Ngắn tay + Gile",
+    title: "Áo điều hoà ngắn tay + gile",
     href: "/ao-dieu-hoa/ngan-tay",
-    description: "Áo điều hoà ngắn tay, thoáng và nhẹ cho môi trường nhà xưởng.",
+    description: "Áo điều hoà ngắn tay và gile, thoáng và nhẹ cho môi trường nhà xưởng.",
     seoText:
-      "[Đoạn nội dung SEO 100–150 chữ về áo điều hoà ngắn tay.]",
+      "[Đoạn nội dung SEO 100–150 chữ về áo điều hoà ngắn tay và gile.]",
   },
   {
     id: "phu-kien",

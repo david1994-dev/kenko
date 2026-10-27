@@ -4,10 +4,7 @@ export const mainNav: NavItem[] = [
   { label: "Áo điều hoà", href: "/ao-dieu-hoa" },
   { label: "Áo sưởi ấm", href: "/ao-suoi-am" },
   { label: "Máy hút ẩm", href: "/may-hut-am" },
-  { label: "Giảm giá", href: "/giam-gia" },
-  { label: "Giải pháp", href: "/giai-phap" },
-  { label: "Tin tức", href: "/tin-tuc" },
-  { label: "Liên hệ", href: "/lien-he" },
+  { label: "Giới thiệu", href: "/gioi-thieu" },
 ];
 
 export const industries = [

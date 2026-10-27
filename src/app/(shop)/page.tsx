@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BestSellers } from "@/components/best-sellers";
-import { ChevronRightIcon } from "@/components/icons";
+import { CheckIcon, ChevronRightIcon } from "@/components/icons";
 import { TrustBanner } from "@/components/trust-banner";
 import { ButtonLink, Container, ImagePlaceholder, SectionHeading } from "@/components/ui";
 import { articles, howItWorks, industries } from "@/data/content";
@@ -19,7 +19,7 @@ export default async function HomePage() {
   const [categories, products] = await Promise.all([getCategories(), getProducts()]);
   const bestSellerTabs = [
     { id: "dai-tay", label: "Dài tay" },
-    { id: "ngan-tay", label: "Ngắn tay" },
+    { id: "ngan-tay", label: "Ngắn tay + Gile" },
     { id: "phu-kien", label: "Phụ kiện" },
   ].map((t) => ({
     ...t,
@@ -85,6 +85,58 @@ export default async function HomePage() {
         <SectionHeading title="Bán chạy" href="/ao-dieu-hoa" />
         <BestSellers tabs={bestSellerTabs} />
       </Container>
+
+      <section className="mt-6 md:mt-12">
+        <Container>
+          <div className="grid gap-5 rounded-2xl bg-brand p-5 md:grid-cols-[1.3fr_1fr] md:gap-8 md:p-8">
+            <div>
+              <h2 className="mb-2 text-xl font-extrabold md:text-2xl">Về {site.name}</h2>
+              <p className="mb-3 text-[15px]">
+                {site.name} bán áo điều hoà làm mát và phụ kiện cho người làm việc ngoài trời, trong nhà xưởng.
+                Mua tại cửa hàng ở {site.address} hoặc đặt hàng online, nhận hàng rồi mới thanh toán.
+              </p>
+              <ul className="grid gap-1.5 text-[15px] font-semibold">
+                {[
+                  "Kiểm tra, test hàng chính hãng trước khi thanh toán",
+                  "Miễn phí vận chuyển",
+                  "Ship hàng hoả tốc",
+                  "Bảo hành 12 tháng",
+                  "Tư vấn chọn size qua Zalo",
+                ].map((t) => (
+                  <li key={t} className="flex items-start gap-2">
+                    <CheckIcon size={20} strokeWidth={3} className="mt-0.5 shrink-0 text-navy" />
+                    {t}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex flex-col justify-center gap-3 rounded-xl bg-white p-4">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wide text-subtle">Địa chỉ</div>
+                <div className="font-semibold">{site.address}</div>
+              </div>
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wide text-subtle">Hotline / Zalo</div>
+                <div className="text-xl font-extrabold text-navy">{site.hotline}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <a
+                  href={site.hotlineHref}
+                  className="flex h-11 items-center justify-center rounded-lg bg-cta text-sm font-bold text-white hover:bg-cta-dark"
+                >
+                  Gọi ngay
+                </a>
+                <a
+                  href={site.zaloHref}
+                  className="flex h-11 items-center justify-center rounded-lg border-2 border-navy text-sm font-bold text-navy hover:bg-mist"
+                >
+                  Nhắn Zalo
+                </a>
+              </div>
+            </div>
+          </div>
+        </Container>
+      </section>
 
       <section className="mt-6 bg-ground py-6 md:mt-12 md:py-12">
         <Container>

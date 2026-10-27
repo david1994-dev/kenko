@@ -6,7 +6,7 @@ import { getCategory, getProductsInCategory } from "@/lib/catalog";
 export async function generateMetadata(): Promise<Metadata> {
   const cat = await getCategory("ao-dieu-hoa");
   return {
-    title: "Áo điều hoà dài tay, ngắn tay - làm mát chủ động",
+    title: "Áo điều hoà dài tay, ngắn tay + gile - làm mát chủ động",
     description: cat?.description,
     alternates: { canonical: "/ao-dieu-hoa" },
   };
@@ -27,8 +27,7 @@ export default async function Page() {
       chips={[
         { label: "Tất cả", href: "/ao-dieu-hoa", active: true },
         { label: "Dài tay", href: "/ao-dieu-hoa/dai-tay" },
-        { label: "Ngắn tay", href: "/ao-dieu-hoa/ngan-tay" },
-        { label: "Phụ kiện", href: "/phu-kien" },
+        { label: "Ngắn tay + Gile", href: "/ao-dieu-hoa/ngan-tay" },
       ]}
       seoTitle="Chọn áo điều hoà phù hợp"
       seoText={cat.seoText}

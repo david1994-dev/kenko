@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
   integer,
   jsonb,
@@ -14,6 +15,9 @@ import {
 
 export const productStatuses = ["draft", "active", "hidden"] as const;
 export const orderStatuses = ["new", "confirmed", "shipping", "delivered", "cancelled", "returned"] as const;
+
+export const reviewStatuses = ["pending", "approved", "hidden"] as const;
+export type ReviewStatus = (typeof reviewStatuses)[number];
 
 export type ProductStatus = (typeof productStatuses)[number];
 export type OrderStatus = (typeof orderStatuses)[number];
@@ -46,6 +50,7 @@ export const products = pgTable(
     price: integer("price").notNull(),
     salePrice: integer("sale_price"),
     soldCount: integer("sold_count").notNull().default(0),
+    giftNote: text("gift_note").notNull().default(""),
     sku: text("sku").notNull().default(""),
     specs: jsonb("specs").$type<{ label: string; value: string }[]>().notNull().default(sql`'[]'::jsonb`),
     faqs: jsonb("faqs").$type<{ q: string; a: string }[]>().notNull().default(sql`'[]'::jsonb`),
@@ -154,4 +159,27 @@ export const orderStatusHistory = pgTable(
     createdAt: createdAt(),
   },
   (t) => [index("order_status_history_order_idx").on(t.orderId)],
+);
+
+export const productReviews = pgTable(
+  "product_reviews",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    productId: uuid("product_id")
+      .notNull()
+      .references(() => products.id, { onDelete: "cascade" }),
+    orderId: uuid("order_id")
+      .notNull()
+      .references(() => orders.id, { onDelete: "cascade" }),
+    authorName: text("author_name").notNull(),
+    rating: integer("rating").notNull(),
+    comment: text("comment").notNull().default(""),
+    status: text("status").$type<ReviewStatus>().notNull().default("pending"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    unique("product_reviews_order_product_uq").on(t.orderId, t.productId),
+    index("product_reviews_product_idx").on(t.productId, t.status),
+    check("product_reviews_rating_range", sql`${t.rating} between 1 and 5`),
+  ],
 );

@@ -23,6 +23,8 @@ export type ProductFormValues = {
   description: string;
   price: number;
   salePrice: number | null;
+  soldCount: number;
+  giftNote: string;
   status: string;
 };
 
@@ -44,6 +46,11 @@ export function ProductForm({ product }: { product: ProductFormValues }) {
         <input id="salePrice" name="salePrice" type="number" min={0} step={1000} defaultValue={product.salePrice ?? ""} className={input} />
       </div>
       <div>
+        <label htmlFor="soldCount" className="mb-1 block text-sm font-semibold">Số lượng đã bán</label>
+        <input id="soldCount" name="soldCount" type="number" min={0} step={1} defaultValue={product.soldCount} className={input} />
+        <p className="mt-1 text-xs text-subtle">Nhập số đã bán thật, kể cả đã bán qua Shopee, TikTok, Facebook.</p>
+      </div>
+      <div>
         <label htmlFor="status" className="mb-1 block text-sm font-semibold">Trạng thái</label>
         <select id="status" name="status" defaultValue={product.status} className={input}>
           <option value="active">Đang bán</option>
@@ -54,6 +61,18 @@ export function ProductForm({ product }: { product: ProductFormValues }) {
       <div>
         <label htmlFor="sku" className="mb-1 block text-sm font-semibold">Mã sản phẩm</label>
         <input id="sku" name="sku" defaultValue={product.sku} className={input} />
+      </div>
+      <div className="md:col-span-2">
+        <label htmlFor="giftNote" className="mb-1 block text-sm font-semibold">Quà tặng miễn phí (để trống nếu không có)</label>
+        <textarea
+          id="giftNote"
+          name="giftNote"
+          rows={2}
+          maxLength={500}
+          defaultValue={product.giftNote}
+          placeholder="Mỗi quà một dòng"
+          className="w-full rounded-lg border border-edge px-3 py-2.5 text-base outline-none focus:border-teal"
+        />
       </div>
       <div className="md:col-span-2">
         <label htmlFor="summary" className="mb-1 block text-sm font-semibold">Mô tả ngắn</label>

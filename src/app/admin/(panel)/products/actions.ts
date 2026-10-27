@@ -26,6 +26,8 @@ const productSchema = z
     description: z.string().trim().max(10000),
     price: z.number().int("Giá phải là số nguyên.").min(0, "Giá không hợp lệ."),
     salePrice: z.number().int().min(0).nullable(),
+    soldCount: z.number().int("Số đã bán phải là số nguyên.").min(0, "Số đã bán không hợp lệ."),
+    giftNote: z.string().trim().max(500, "Quà tặng tối đa 500 ký tự."),
     status: z.enum(productStatuses),
   })
   .refine((v) => v.salePrice === null || v.salePrice < v.price, {
@@ -49,6 +51,8 @@ export async function updateProduct(_prev: FormState, data: FormData): Promise<F
     description: data.get("description") ?? "",
     price: Number(data.get("price")),
     salePrice: intOrNull(data.get("salePrice")),
+    soldCount: Number(data.get("soldCount") || 0),
+    giftNote: data.get("giftNote") ?? "",
     status: data.get("status"),
   });
   if (!parsed.success) return { message: parsed.error.issues[0].message };

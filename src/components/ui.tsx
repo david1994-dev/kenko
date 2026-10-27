@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { discountPercent, formatPrice } from "@/lib/format";
+import { RatingLine } from "./stars";
 import type { Product } from "@/lib/types";
 
 export function ImagePlaceholder({
@@ -109,6 +110,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
         </ul>
       )}
       <Price product={product} />
+      {product.rating && <RatingLine rating={product.rating} size={13} />}
       <span className="text-xs text-subtle">Đã bán {product.sold}</span>
     </Link>
   );

@@ -12,11 +12,15 @@ export default function Page() {
   return (
     <ContentPage title="Liên hệ" crumbs={[{ name: "Liên hệ", href: "/lien-he" }]}>
       <p>
-        Hotline: <a href={site.hotlineHref} className="font-bold text-navy underline">{site.hotline}</a>
+        Hotline:{" "}
+        <a href={site.hotlineHref} className="font-bold text-navy underline">
+          {site.hotline}
+        </a>
         <br />
-        Email: {site.email}
-        <br />
-        Giờ làm việc: {site.hours}
+        Zalo:{" "}
+        <a href={site.zaloHref} className="font-bold text-navy underline">
+          {site.hotline}
+        </a>
       </p>
       <h2 className="pt-2 text-lg font-bold">Địa chỉ cửa hàng</h2>
       <p className="rounded-lg border border-line p-3">{site.address}</p>

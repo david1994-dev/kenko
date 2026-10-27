@@ -22,6 +22,16 @@ export type Category = {
   parentSlug: string | null;
 };
 
+export type Rating = { avg: number; count: number };
+
+export type Review = {
+  id: string;
+  authorName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+};
+
 export type Product = {
   id: string;
   slug: string;
@@ -34,6 +44,8 @@ export type Product = {
   price: number;
   salePrice?: number;
   sold: number;
+  giftNote: string;
+  rating: Rating | null;
   sku: string;
   colors: Color[];
   sizes: string[];

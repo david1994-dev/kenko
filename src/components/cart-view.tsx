@@ -130,8 +130,7 @@ export function CartView() {
         </section>
 
         <section className="rounded-xl bg-white p-4 ring-1 ring-line">
-          <h2 className="mb-0.5 text-base font-bold">Thông tin nhận hàng</h2>
-          <p className="mb-3 text-[13px] text-subtle">Không cần tạo tài khoản.</p>
+          <h2 className="mb-3 text-base font-bold">Thông tin nhận hàng</h2>
           <div className="flex flex-col gap-3">
             <Field id="name" label="Họ và tên" error={errors.name}>
               <input id="name" name="name" autoComplete="name" className={inputClass} {...bind("name")} />
@@ -145,24 +144,6 @@ export function CartView() {
                 autoComplete="tel"
                 className={inputClass}
                 {...bind("phone")}
-              />
-            </Field>
-            <Field id="province" label="Tỉnh / Thành phố" error={errors.province}>
-              <input
-                id="province"
-                name="province"
-                autoComplete="address-level1"
-                className={inputClass}
-                {...bind("province")}
-              />
-            </Field>
-            <Field id="district" label="Quận / Huyện, Phường / Xã" error={errors.district}>
-              <input
-                id="district"
-                name="district"
-                autoComplete="address-level2"
-                className={inputClass}
-                {...bind("district")}
               />
             </Field>
             <Field id="address" label="Địa chỉ cụ thể" error={errors.address}>
@@ -192,7 +173,7 @@ export function CartView() {
             <CheckIcon size={20} className="shrink-0 text-navy" />
             <p>
               <span className="block text-sm font-semibold">Thanh toán khi nhận hàng (COD)</span>
-              <span className="block text-[13px] text-muted">Kiểm tra hàng rồi mới trả tiền</span>
+              <span className="block text-[13px] text-muted">Kiểm tra, test hàng chính hãng rồi mới thanh toán</span>
             </p>
           </div>
         </section>
@@ -207,7 +188,7 @@ export function CartView() {
           </div>
           <div className="flex justify-between">
             <dt className="text-muted">Phí vận chuyển</dt>
-            <dd className="text-muted">Xác nhận khi liên hệ</dd>
+            <dd className="font-semibold text-[#14532d]">Miễn phí</dd>
           </div>
           <div className="mt-1 flex justify-between border-t border-line pt-3 text-[17px] font-extrabold">
             <dt>Tổng cộng</dt>

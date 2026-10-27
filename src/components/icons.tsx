@@ -74,3 +74,9 @@ export const BoltIcon = (p: IconProps) => (
 export const CheckIcon =(p: IconProps) => (
   <Icon {...p}><path d="M5 12l5 5 9-10" /></Icon>
 );
+export const GiftIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M4 10h16v10H4zM3 7h18v3H3zM12 7v13" />
+    <path d="M12 7C10 7 8 6.2 8 4.8 8 3.8 9 3 10 3c1.7 0 2 2.5 2 4zM12 7c2 0 4-.8 4-2.2C16 3.8 15 3 14 3c-1.7 0-2 2.5-2 4z" />
+  </Icon>
+);

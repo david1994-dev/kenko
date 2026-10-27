@@ -1,10 +1,10 @@
 import "server-only";
-import { asc, desc, eq, inArray } from "drizzle-orm";
+import { asc, avg, count, desc, eq, inArray, and } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 import { db, schema } from "@/db";
-import type { Category, Color, Product } from "./types";
+import type { Category, Color, Product, Review } from "./types";
 
-const { categories, products, productVariants, productImages } = schema;
+const { categories, products, productVariants, productImages, productReviews } = schema;
 
 export async function getCategories(): Promise<Category[]> {
   "use cache";
@@ -39,14 +39,20 @@ export async function getProducts(): Promise<Product[]> {
   if (rows.length === 0) return [];
 
   const ids = rows.map((r) => r.p.id);
-  const [variants, images] = await Promise.all([
+  const [variants, images, ratings] = await Promise.all([
     db
       .select()
       .from(productVariants)
       .where(inArray(productVariants.productId, ids))
       .orderBy(asc(productVariants.sortOrder)),
     db.select().from(productImages).where(inArray(productImages.productId, ids)).orderBy(asc(productImages.sortOrder)),
+    db
+      .select({ productId: productReviews.productId, avg: avg(productReviews.rating), n: count() })
+      .from(productReviews)
+      .where(and(inArray(productReviews.productId, ids), eq(productReviews.status, "approved")))
+      .groupBy(productReviews.productId),
   ]);
+  const ratingByProduct = new Map(ratings.map((r) => [r.productId, { avg: Number(r.avg), count: r.n }]));
 
   return rows.map(({ p, c }) => {
     const vs = variants.filter((v) => v.productId === p.id && v.isActive);
@@ -66,6 +72,8 @@ export async function getProducts(): Promise<Product[]> {
       price: p.price,
       salePrice: p.salePrice ?? undefined,
       sold: p.soldCount,
+      giftNote: p.giftNote,
+      rating: ratingByProduct.get(p.id) ?? null,
       sku: p.sku,
       colors: [...colors.values()],
       sizes,
@@ -100,4 +108,24 @@ export async function getSaleProducts() {
 
 export async function getCategory(slug: string) {
   return (await getCategories()).find((c) => c.slug === slug);
+}
+
+export async function getProductReviews(productId: string): Promise<Review[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("catalog");
+
+  const rows = await db
+    .select()
+    .from(productReviews)
+    .where(and(eq(productReviews.productId, productId), eq(productReviews.status, "approved")))
+    .orderBy(desc(productReviews.createdAt))
+    .limit(50);
+  return rows.map((r) => ({
+    id: r.id,
+    authorName: r.authorName,
+    rating: r.rating,
+    comment: r.comment,
+    createdAt: r.createdAt.toISOString(),
+  }));
 }

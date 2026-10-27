@@ -153,9 +153,10 @@ export function Header() {
               ))}
             </nav>
             <div className="border-t border-line p-4 text-sm text-muted">
-              Hotline {site.hotline}
-              <br />
-              {site.hours}
+              Hotline / Zalo:{" "}
+              <a href={site.hotlineHref} className="font-semibold text-ink">
+                {site.hotline}
+              </a>
             </div>
           </div>
         </div>
