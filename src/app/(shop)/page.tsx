@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BestSellers } from "@/components/best-sellers";
-import { CheckIcon, ChevronRightIcon } from "@/components/icons";
+import { CheckIcon } from "@/components/icons";
 import { TrustBanner } from "@/components/trust-banner";
 import { ButtonLink, Container, ImagePlaceholder, SectionHeading } from "@/components/ui";
-import { articles, howItWorks, industries } from "@/data/content";
+import { articles, howItWorks } from "@/data/content";
 import { getCategories, getProducts } from "@/lib/catalog";
 import { formatDate } from "@/lib/format";
 import { site } from "@/lib/site";
@@ -161,23 +161,6 @@ export default async function HomePage() {
           </ButtonLink>
         </Container>
       </section>
-
-      <Container className="pt-6 md:pt-12">
-        <SectionHeading title="Giải pháp theo ngành" href="/giai-phap" />
-        <ul className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-          {industries.map((i) => (
-            <li key={i.slug}>
-              <Link
-                href={`/giai-phap/${i.slug}`}
-                className="flex min-h-12 items-center justify-between rounded-lg border border-line px-3 text-sm font-semibold hover:bg-mist md:min-h-14 md:px-4 md:text-[15px]"
-              >
-                {i.name}
-                <ChevronRightIcon size={16} strokeWidth={2.5} className="text-teal" />
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </Container>
 
       <Container className="pt-6 md:pt-12">
         <SectionHeading title="Khách hàng nói gì" />
