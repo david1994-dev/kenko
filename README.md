@@ -28,10 +28,9 @@ Without a Blob store connected, images uploaded in `/admin` are saved to `public
 
 1. Create a Postgres database (Storage → Neon) and a Blob store (Storage → Blob) and connect both to the project.
 2. Add `ADMIN_PASSWORD`, `SESSION_SECRET` and `NEXT_PUBLIC_SITE_URL` in Settings → Environment Variables.
-3. Create the tables and load the sample catalog against the production database:
+3. Tables are created and updated automatically: the `vercel-build` script runs `drizzle-kit migrate` before `next build`. Load the sample catalog once against the production database (not part of the build, so it never overwrites your edits):
 
    ```bash
-   DATABASE_URL="<production url>" npm run db:migrate
    DATABASE_URL="<production url>" npm run db:seed
    ```
 
