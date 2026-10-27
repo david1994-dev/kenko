@@ -12,7 +12,7 @@ npm run db:seed              # load the sample catalog (safe to re-run)
 npm run dev
 ```
 
-Without `BLOB_READ_WRITE_TOKEN`, images uploaded in `/admin` are saved to `public/uploads` (dev only).
+Without a Blob store connected, images uploaded in `/admin` are saved to `public/uploads` (dev only).
 
 ## Environment variables
 
@@ -21,7 +21,7 @@ Without `BLOB_READ_WRITE_TOKEN`, images uploaded in `/admin` are saved to `publi
 | `DATABASE_URL` | Postgres connection string (use the pooled URL on Neon) |
 | `ADMIN_PASSWORD` | Password for `/admin` |
 | `SESSION_SECRET` | Random string of 32+ characters that signs the admin cookie |
-| `BLOB_READ_WRITE_TOKEN` | Added automatically when a Blob store is connected in Vercel |
+| `BLOB_STORE_ID` / `BLOB_READ_WRITE_TOKEN` | Added automatically when a Blob store is connected in Vercel (new stores use `BLOB_STORE_ID` with OIDC, older ones a read-write token) |
 | `NEXT_PUBLIC_SITE_URL` | Public URL, used in sitemap, canonical links and structured data |
 
 ## Deploy on Vercel

@@ -4,6 +4,9 @@ import { mkdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { del, put } from "@vercel/blob";
 
+// Kho Blob mới xác thực bằng OIDC (BLOB_STORE_ID), kho cũ dùng BLOB_READ_WRITE_TOKEN.
+const hasBlob = () => Boolean(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID);
+
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
@@ -25,12 +28,12 @@ export async function saveImage(file: File, slug: string): Promise<string> {
 
   const name = `${randomUUID()}.${EXT[type]}`;
 
-  if (process.env.BLOB_READ_WRITE_TOKEN) {
+  if (hasBlob()) {
     const blob = await put(`products/${slug}/${name}`, Buffer.from(buffer), { access: "public", contentType: type });
     return blob.url;
   }
   if (process.env.NODE_ENV === "production") {
-    throw new Error("Chưa kết nối Vercel Blob (thiếu BLOB_READ_WRITE_TOKEN).");
+    throw new Error("Chưa kết nối Vercel Blob (thiếu BLOB_STORE_ID hoặc BLOB_READ_WRITE_TOKEN).");
   }
 
   // Chỉ dùng khi chạy local mà chưa có token Blob.
@@ -44,7 +47,7 @@ export async function removeImage(url: string) {
   try {
     if (url.startsWith("/uploads/") && !url.includes("..")) {
       await unlink(path.join(process.cwd(), "public", url));
-    } else if (process.env.BLOB_READ_WRITE_TOKEN) {
+    } else if (hasBlob()) {
       await del(url);
     }
   } catch {
