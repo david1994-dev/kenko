@@ -21,6 +21,13 @@ export default function ShopLayout({ children }: LayoutProps<"/">) {
           name: site.name,
           url: absoluteUrl("/"),
           description: site.description,
+          telephone: "+84358585363",
+          address: {
+            "@type": "PostalAddress",
+            addressLocality: "Cửa Lò",
+            addressRegion: "Nghệ An",
+            addressCountry: "VN",
+          },
         }}
       />
     </div>

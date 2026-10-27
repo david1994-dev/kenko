@@ -69,13 +69,20 @@ export const articles = [
 ];
 
 export const sizeChart = {
-  head: ["Size", "Chiều cao (cm)", "Cân nặng (kg)"],
+  title: "Bảng chọn size áo dài tay thông dụng 2025",
+  head: ["Size nam/nữ", "Chiều cao (cm)", "Cân nặng (kg)", "Rộng vai (cm)", "Vòng ngực (cm)", "Dài thân (cm)"],
   rows: [
-    ["S", "[...]", "[...]"],
-    ["M", "[...]", "[...]"],
-    ["L", "[...]", "[...]"],
-    ["XL", "[...]", "[...]"],
-    ["XXL", "[...]", "[...]"],
+    ["S", "< 160", "42 - 53", "46", "110", "64"],
+    ["M", "155 - 168", "50 - 58", "48", "118", "66"],
+    ["L", "165 - 173", "58 - 66", "49", "121", "68"],
+    ["XL", "170 - 178", "65 - 75", "51", "127", "69"],
+    ["XXL", "175 - 185", "73 - 85", "53", "133", "71"],
+    ["XXXL", "180 - 190", "85 - 100", "56", "140", "73"],
+  ],
+  tips: [
+    "Nằm giữa 2 size: ưu tiên cân nặng để không bị chật.",
+    "Thích mặc rộng rãi, vận động nhiều: chọn nhỉnh hơn một size (không nên chọn quá rộng).",
+    "Người bụng to, vai rộng: nên lên 1 size để thoải mái.",
   ],
 };
 

@@ -21,14 +21,8 @@ export function Footer() {
         </div>
 
         <div>
-          <h2 className="mb-2 font-bold text-brand">Cửa hàng</h2>
-          <ul className="space-y-1">
-            {site.stores.map((s) => (
-              <li key={s.city}>
-                {s.city}: {s.address} · {s.phone}
-              </li>
-            ))}
-          </ul>
+          <h2 className="mb-2 font-bold text-brand">Địa chỉ</h2>
+          <p>{site.address}</p>
         </div>
 
         <div>
