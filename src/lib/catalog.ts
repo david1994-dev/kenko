@@ -119,13 +119,14 @@ export async function getProductReviews(productId: string): Promise<Review[]> {
     .select()
     .from(productReviews)
     .where(and(eq(productReviews.productId, productId), eq(productReviews.status, "approved")))
-    .orderBy(desc(productReviews.createdAt))
+    .orderBy(desc(productReviews.reviewedAt))
     .limit(50);
   return rows.map((r) => ({
     id: r.id,
     authorName: r.authorName,
     rating: r.rating,
     comment: r.comment,
-    createdAt: r.createdAt.toISOString(),
+    source: r.source,
+    reviewedAt: r.reviewedAt.toISOString(),
   }));
 }

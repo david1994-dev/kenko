@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 import { ClearCart } from "@/components/clear-cart";
 import { CheckIcon } from "@/components/icons";
@@ -35,9 +34,6 @@ export default function Page(props: PageProps<"/dat-hang-thanh-cong">) {
       </Suspense>
       <p className="mb-6 text-muted">
         Chúng tôi sẽ gọi xác nhận đơn trong thời gian sớm nhất. Cần hỗ trợ gấp, vui lòng gọi hotline {site.hotline}.
-      </p>
-      <p className="mb-6 text-sm text-muted">
-        Sau khi nhận hàng, bạn có thể đánh giá sản phẩm tại <Link href="/danh-gia" className="font-semibold text-navy underline">trang đánh giá</Link> bằng mã đơn ở trên.
       </p>
       <ButtonLink href="/" className="w-full max-w-xs">
         Về trang chủ

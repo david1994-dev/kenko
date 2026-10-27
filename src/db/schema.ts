@@ -17,6 +17,8 @@ export const productStatuses = ["draft", "active", "hidden"] as const;
 export const orderStatuses = ["new", "confirmed", "shipping", "delivered", "cancelled", "returned"] as const;
 
 export const reviewStatuses = ["pending", "approved", "hidden"] as const;
+export const reviewSources = ["zalo", "facebook", "shopee", "tiktok", "store", "order"] as const;
+export type ReviewSource = (typeof reviewSources)[number];
 export type ReviewStatus = (typeof reviewStatuses)[number];
 
 export type ProductStatus = (typeof productStatuses)[number];
@@ -168,9 +170,10 @@ export const productReviews = pgTable(
     productId: uuid("product_id")
       .notNull()
       .references(() => products.id, { onDelete: "cascade" }),
-    orderId: uuid("order_id")
-      .notNull()
-      .references(() => orders.id, { onDelete: "cascade" }),
+    // Đánh giá nhập trong trang quản trị thì không gắn với đơn hàng.
+    orderId: uuid("order_id").references(() => orders.id, { onDelete: "cascade" }),
+    source: text("source").$type<ReviewSource>().notNull().default("order"),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }).notNull().defaultNow(),
     authorName: text("author_name").notNull(),
     rating: integer("rating").notNull(),
     comment: text("comment").notNull().default(""),

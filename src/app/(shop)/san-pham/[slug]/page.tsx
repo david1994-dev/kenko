@@ -11,7 +11,7 @@ import { Container, DiscountBadge, ImagePlaceholder, Price, ProductCard, Section
 import { getProduct, getProductReviews, getProducts } from "@/lib/catalog";
 import { RatingLine, Stars } from "@/components/stars";
 import { formatRating, maskName } from "@/lib/format";
-import Link from "next/link";
+import { publicSourceLabel } from "@/lib/review-source";
 import { currentPrice } from "@/lib/price";
 import { absoluteUrl, site } from "@/lib/site";
 
@@ -176,33 +176,29 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
 
       <Container className="pt-8">
         <div className="max-w-3xl">
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-lg font-bold md:text-2xl md:font-extrabold">Đánh giá của khách hàng</h2>
-            <Link href="/danh-gia" className="flex min-h-11 items-center text-sm font-semibold text-teal underline">
-              Đã mua hàng? Viết đánh giá
-            </Link>
-          </div>
+          <h2 className="mb-3 text-lg font-bold md:text-2xl md:font-extrabold">Đánh giá của khách hàng</h2>
           {product.rating ? (
             <div className="mb-4 flex items-center gap-3 rounded-xl bg-ground p-3">
               <span className="text-3xl font-extrabold">{formatRating(product.rating.avg)}</span>
               <div>
                 <Stars value={product.rating.avg} size={20} />
-                <div className="text-[13px] text-subtle">{product.rating.count} đánh giá từ khách đã mua</div>
+                <div className="text-[13px] text-subtle">{product.rating.count} đánh giá</div>
               </div>
             </div>
           ) : (
-            <p className="mb-4 text-sm text-muted">Chưa có đánh giá. Đánh giá chỉ nhận từ khách đã nhận hàng.</p>
+            <p className="mb-4 text-sm text-muted">Chưa có đánh giá.</p>
           )}
           <ul className="divide-y divide-line">
             {reviews.map((r) => (
               <li key={r.id} className="py-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-semibold">{maskName(r.authorName)}</span>
+                  <span className="font-semibold">{r.source === "order" ? maskName(r.authorName) : r.authorName}</span>
                   <Stars value={r.rating} size={14} />
                   <span className="text-xs text-subtle">
-                    {new Date(r.createdAt).toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
+                    {new Date(r.reviewedAt).toLocaleDateString("vi-VN", { timeZone: "Asia/Ho_Chi_Minh" })}
                   </span>
                 </div>
+                <div className="text-xs text-subtle">{publicSourceLabel(r.source)}</div>
                 {r.comment && <p className="mt-1 whitespace-pre-line text-sm text-muted">{r.comment}</p>}
               </li>
             ))}

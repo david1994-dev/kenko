@@ -29,7 +29,8 @@ export type Review = {
   authorName: string;
   rating: number;
   comment: string;
-  createdAt: string;
+  source: string;
+  reviewedAt: string;
 };
 
 export type Product = {
