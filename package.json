@@ -10,7 +10,9 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
-    "vercel-build": "drizzle-kit migrate && next build"
+    "vercel-build": "drizzle-kit migrate && next build",
+    "db:test-reviews": "tsx --env-file=.env.local scripts/test-reviews.ts",
+    "db:test-reviews:remove": "tsx --env-file=.env.local scripts/test-reviews.ts --remove"
   },
   "dependencies": {
     "@vercel/blob": "^2.8.2",
