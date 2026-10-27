@@ -200,6 +200,23 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
                 </div>
                 <div className="text-xs text-subtle">{publicSourceLabel(r.source)}</div>
                 {r.comment && <p className="mt-1 whitespace-pre-line text-sm text-muted">{r.comment}</p>}
+                {r.images.length > 0 && (
+                  <ul className="mt-2 flex flex-wrap gap-2">
+                    {r.images.map((url, i) => (
+                      <li key={url}>
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noopener"
+                          aria-label={`Xem ảnh ${i + 1} của khách`}
+                          className="relative block size-20 overflow-hidden rounded-lg bg-mist"
+                        >
+                          <Image src={url} alt={`Ảnh khách hàng gửi, ${i + 1}`} fill sizes="80px" className="object-cover" />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             ))}
           </ul>

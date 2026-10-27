@@ -1,0 +1,1 @@
+ALTER TABLE "product_reviews" ADD COLUMN "images" jsonb DEFAULT '[]'::jsonb NOT NULL;

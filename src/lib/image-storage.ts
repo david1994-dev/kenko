@@ -20,7 +20,7 @@ function sniff(bytes: Uint8Array): string | null {
   return null;
 }
 
-export async function saveImage(file: File, slug: string): Promise<string> {
+export async function saveImage(file: File, slug: string, folder: "products" | "reviews" = "products"): Promise<string> {
   if (file.size > MAX_IMAGE_BYTES) throw new Error(`${file.name}: ảnh lớn hơn 4 MB.`);
   const buffer = new Uint8Array(await file.arrayBuffer());
   const type = sniff(buffer);
@@ -29,7 +29,7 @@ export async function saveImage(file: File, slug: string): Promise<string> {
   const name = `${randomUUID()}.${EXT[type]}`;
 
   if (hasBlob()) {
-    const blob = await put(`products/${slug}/${name}`, Buffer.from(buffer), { access: "public", contentType: type });
+    const blob = await put(`${folder}/${slug}/${name}`, Buffer.from(buffer), { access: "public", contentType: type });
     return blob.url;
   }
   if (process.env.NODE_ENV === "production") {
@@ -37,10 +37,11 @@ export async function saveImage(file: File, slug: string): Promise<string> {
   }
 
   // Chỉ dùng khi chạy local mà chưa có token Blob.
-  const dir = path.join(process.cwd(), "public", "uploads", slug);
+  const sub = folder === "products" ? slug : `${folder}/${slug}`;
+  const dir = path.join(process.cwd(), "public", "uploads", sub);
   await mkdir(dir, { recursive: true });
   await writeFile(path.join(dir, name), buffer);
-  return `/uploads/${slug}/${name}`;
+  return `/uploads/${sub}/${name}`;
 }
 
 export async function removeImage(url: string) {

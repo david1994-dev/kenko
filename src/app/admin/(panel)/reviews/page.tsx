@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { desc, eq, asc } from "drizzle-orm";
 import { AdminReviewForm } from "@/components/admin-review-form";
 import { Card } from "@/components/admin-ui";
@@ -34,6 +35,7 @@ export default async function Page() {
         productId: productReviews.productId,
         rating: productReviews.rating,
         comment: productReviews.comment,
+        images: productReviews.images,
         status: productReviews.status,
         source: productReviews.source,
         author: productReviews.authorName,
@@ -72,6 +74,15 @@ export default async function Page() {
               {r.author} · {dateVN(r.reviewedAt).split("-").reverse().join("/")} · {adminSourceLabel(r.source)}
             </div>
             {r.comment && <p className="mt-2 whitespace-pre-line text-sm">{r.comment}</p>}
+            {r.images.length > 0 && (
+              <ul className="mt-2 flex flex-wrap gap-2">
+                {r.images.map((url) => (
+                  <li key={url} className="relative size-16 overflow-hidden rounded-lg bg-mist">
+                    <Image src={url} alt="" fill sizes="64px" className="object-cover" />
+                  </li>
+                ))}
+              </ul>
+            )}
 
             <div className="mt-3 flex flex-wrap gap-2">
               {r.status !== "approved" && (
@@ -109,6 +120,7 @@ export default async function Page() {
                         comment: r.comment,
                         source: r.source,
                         reviewedOn: dateVN(r.reviewedAt),
+                        images: r.images,
                       }}
                     />
                   </div>

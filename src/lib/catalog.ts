@@ -126,6 +126,7 @@ export async function getProductReviews(productId: string): Promise<Review[]> {
     authorName: r.authorName,
     rating: r.rating,
     comment: r.comment,
+    images: r.images,
     source: r.source,
     reviewedAt: r.reviewedAt.toISOString(),
   }));

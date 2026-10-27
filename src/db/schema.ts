@@ -177,6 +177,7 @@ export const productReviews = pgTable(
     authorName: text("author_name").notNull(),
     rating: integer("rating").notNull(),
     comment: text("comment").notNull().default(""),
+    images: jsonb("images").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
     status: text("status").$type<ReviewStatus>().notNull().default("pending"),
     createdAt: createdAt(),
   },

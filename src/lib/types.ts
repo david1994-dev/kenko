@@ -29,6 +29,7 @@ export type Review = {
   authorName: string;
   rating: number;
   comment: string;
+  images: string[];
   source: string;
   reviewedAt: string;
 };
