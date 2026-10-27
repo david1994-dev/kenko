@@ -1,12 +1,14 @@
 "use server";
 
-import { and, eq, min, sql } from "drizzle-orm";
+import { and, eq, like, min, sql } from "drizzle-orm";
 import { revalidatePath, updateTag } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { productStatuses } from "@/db/schema";
 import { requireAdmin } from "@/lib/admin-auth";
 import { removeImage, saveImage } from "@/lib/image-storage";
+import { slugify } from "@/lib/slug";
 
 const { products, productVariants, productImages } = schema;
 
@@ -138,4 +140,109 @@ export async function makeCover(data: FormData) {
     .set({ sortOrder: (first ?? 0) - 1 })
     .where(eq(productImages.id, imageId));
   touchCatalog(img.productId);
+}
+
+const createSchema = z
+  .object({
+    name: z.string().trim().min(2, "Tên sản phẩm quá ngắn.").max(200, "Tên sản phẩm tối đa 200 ký tự."),
+    categoryId: z.coerce.number().int("Vui lòng chọn danh mục.").positive("Vui lòng chọn danh mục."),
+    sku: z.string().trim().max(40),
+    summary: z.string().trim().max(500),
+    description: z.string().trim().max(10000),
+    giftNote: z.string().trim().max(500),
+    price: z.number().int("Giá phải là số nguyên.").min(1, "Vui lòng nhập giá gốc."),
+    salePrice: z.number().int().min(0).nullable(),
+    soldCount: z.number().int().min(0, "Số đã bán không hợp lệ."),
+    status: z.enum(productStatuses),
+  })
+  .refine((v) => v.salePrice === null || v.salePrice < v.price, {
+    path: ["salePrice"],
+    message: "Giá khuyến mãi phải nhỏ hơn giá gốc.",
+  });
+
+const HEX = /^#[0-9a-f]{6}$/i;
+const MAX_OPTIONS = 12;
+
+export async function createProduct(_prev: FormState, data: FormData): Promise<FormState> {
+  await requireAdmin();
+
+  const parsed = createSchema.safeParse({
+    name: data.get("name"),
+    categoryId: data.get("categoryId"),
+    sku: data.get("sku") ?? "",
+    summary: data.get("summary") ?? "",
+    description: data.get("description") ?? "",
+    giftNote: data.get("giftNote") ?? "",
+    price: Number(data.get("price")),
+    salePrice: intOrNull(data.get("salePrice")),
+    soldCount: Number(data.get("soldCount") || 0),
+    status: data.get("status"),
+  });
+  if (!parsed.success) return { message: parsed.error.issues[0].message };
+
+  const names = data.getAll("colorName").map((v) => String(v).trim());
+  const hexes = data.getAll("colorHex").map(String);
+  const colors: { name: string; hex: string }[] = [];
+  names.forEach((name, i) => {
+    if (!name || colors.some((c) => c.name.toLowerCase() === name.toLowerCase())) return;
+    colors.push({ name: name.slice(0, 40), hex: HEX.test(hexes[i] ?? "") ? hexes[i] : "#cccccc" });
+  });
+
+  const sizes = [
+    ...new Set(
+      [...data.getAll("size").map(String), ...String(data.get("sizeExtra") ?? "").split(",")]
+        .map((s) => s.trim().toUpperCase().slice(0, 12))
+        .filter(Boolean),
+    ),
+  ];
+  if (colors.length > MAX_OPTIONS || sizes.length > MAX_OPTIONS) {
+    return { message: `Tối đa ${MAX_OPTIONS} màu và ${MAX_OPTIONS} size cho mỗi sản phẩm.` };
+  }
+
+  const { categoryId, ...values } = parsed.data;
+  const [category] = await db.select({ id: schema.categories.id }).from(schema.categories).where(eq(schema.categories.id, categoryId));
+  if (!category) return { message: "Danh mục không tồn tại." };
+
+  const base = slugify(values.name) || "san-pham";
+  const taken = new Set(
+    (await db.select({ slug: products.slug }).from(products).where(like(products.slug, `${base}%`))).map((r) => r.slug),
+  );
+  let slug = base;
+  for (let n = 2; taken.has(slug); n++) slug = `${base}-${n}`;
+
+  const sku = values.sku || `KK-${slug.slice(0, 12).toUpperCase()}`;
+  const colorOptions = colors.length ? colors : [null];
+  const sizeOptions = sizes.length ? sizes : [null];
+
+  let id: string;
+  try {
+    id = await db.transaction(async (tx) => {
+      const [product] = await tx
+        .insert(products)
+        .values({ ...values, sku, slug, categoryId, soldCount: values.soldCount })
+        .returning({ id: products.id });
+      await tx.insert(productVariants).values(
+        colorOptions.flatMap((color, ci) =>
+          sizeOptions.map((size, si) => ({
+            productId: product.id,
+            sku: [sku, color && slugify(color.name), size && slugify(size)].filter(Boolean).join("-"),
+            colorName: color?.name ?? null,
+            colorHex: color?.hex ?? null,
+            size,
+            sortOrder: ci * sizeOptions.length + si,
+          })),
+        ),
+      );
+      return product.id;
+    });
+  } catch (e) {
+    const code = (e as { code?: string; cause?: { code?: string } })?.code ?? (e as { cause?: { code?: string } })?.cause?.code;
+    if (code === "23505") return { message: "Mã sản phẩm đã tồn tại. Vui lòng nhập mã khác." };
+    console.error(e);
+    return { message: "Không tạo được sản phẩm. Vui lòng thử lại." };
+  }
+
+  updateTag("catalog");
+  revalidatePath("/admin/products");
+  redirect(`/admin/products/${id}?created=1`);
 }

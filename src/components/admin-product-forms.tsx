@@ -39,11 +39,11 @@ export function ProductForm({ product }: { product: ProductFormValues }) {
       </div>
       <div>
         <label htmlFor="price" className="mb-1 block text-sm font-semibold">Giá gốc (₫)</label>
-        <input id="price" name="price" type="number" min={0} step={1000} defaultValue={product.price} required className={input} />
+        <input id="price" name="price" type="number" min={0} step={500} defaultValue={product.price} required className={input} />
       </div>
       <div>
         <label htmlFor="salePrice" className="mb-1 block text-sm font-semibold">Giá khuyến mãi (₫, để trống nếu không giảm)</label>
-        <input id="salePrice" name="salePrice" type="number" min={0} step={1000} defaultValue={product.salePrice ?? ""} className={input} />
+        <input id="salePrice" name="salePrice" type="number" min={0} step={500} defaultValue={product.salePrice ?? ""} className={input} />
       </div>
       <div>
         <label htmlFor="soldCount" className="mb-1 block text-sm font-semibold">Số lượng đã bán</label>

@@ -16,9 +16,10 @@ export const metadata: Metadata = { title: "Sửa sản phẩm" };
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-export default async function Page({ params }: PageProps<"/admin/products/[id]">) {
+export default async function Page({ params, searchParams }: PageProps<"/admin/products/[id]">) {
   await requireAdmin();
   const { id } = await params;
+  const created = (await searchParams).created === "1";
   if (!uuid.test(id)) notFound();
 
   const { products, productVariants, productImages } = schema;
@@ -36,6 +37,12 @@ export default async function Page({ params }: PageProps<"/admin/products/[id]">
         ← Danh sách sản phẩm
       </Link>
       <h1 className="text-2xl font-extrabold">{product.name}</h1>
+      {created && (
+        <p role="status" className="rounded-lg bg-mist p-3 text-sm font-semibold text-navy">
+          Đã tạo sản phẩm. Thêm ảnh ở mục bên dưới
+          {product.status === "draft" ? ", rồi đổi trạng thái sang Đang bán để hiện ra ngoài." : "."}
+        </p>
+      )}
 
       <Card title="Thông tin">
         <ProductForm

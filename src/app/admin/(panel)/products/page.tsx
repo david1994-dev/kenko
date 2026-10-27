@@ -33,7 +33,15 @@ export default async function Page() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-extrabold">Sản phẩm</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-extrabold">Sản phẩm</h1>
+        <Link
+          href="/admin/products/new"
+          className="flex h-11 items-center rounded-lg bg-cta px-5 text-sm font-bold text-white hover:bg-cta-dark"
+        >
+          + Thêm sản phẩm
+        </Link>
+      </div>
       <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-line">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="bg-ground text-xs uppercase tracking-wide text-subtle">
