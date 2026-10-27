@@ -1,23 +1,17 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { CloseIcon } from "./icons";
+import { useActionState } from "react";
+import { CheckIcon, CloseIcon } from "./icons";
 import { QuantityStepper } from "./quantity-stepper";
 import { ImagePlaceholder } from "./ui";
+import { placeOrder, type OrderFormState } from "@/app/(shop)/gio-hang/actions";
 import { cart, cartTotal, useCart, useHydrated } from "@/lib/cart";
 import { formatPrice } from "@/lib/format";
 
-const payments = [
-  { id: "cod", name: "Thanh toán khi nhận hàng (COD)", hint: "Kiểm tra hàng rồi mới trả tiền" },
-  { id: "bank", name: "Chuyển khoản ngân hàng", hint: "Nhận thông tin chuyển khoản sau khi đặt hàng" },
-];
-
-type Errors = Partial<Record<"name" | "phone" | "address", string>>;
-
 const inputClass =
-  "h-12 w-full rounded-lg border border-edge bg-white px-3 text-base outline-none focus:border-teal aria-[invalid=true]:border-cta";
+  "h-12 w-full rounded-lg border border-edge bg-white px-3 text-base outline-none focus:border-teal aria-[invalid=true]:border-price";
 
 function Field({
   id,
@@ -37,7 +31,7 @@ function Field({
       </label>
       {children}
       {error && (
-        <p id={`${id}-error`} className="mt-1 text-[13px] font-medium text-cta-dark">
+        <p id={`${id}-error`} className="mt-1 text-[13px] font-medium text-price">
           {error}
         </p>
       )}
@@ -45,12 +39,12 @@ function Field({
   );
 }
 
+const initialState: OrderFormState = {};
+
 export function CartView() {
-  const router = useRouter();
   const items = useCart();
   const hydrated = useHydrated();
-  const [errors, setErrors] = useState<Errors>({});
-  const [payment, setPayment] = useState("cod");
+  const [state, formAction, pending] = useActionState(placeOrder, initialState);
 
   if (!hydrated) {
     return <div className="h-64 animate-pulse rounded-xl bg-ground" aria-hidden="true" />;
@@ -71,45 +65,44 @@ export function CartView() {
   }
 
   const total = cartTotal(items);
-
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const data = new FormData(form);
-    const next: Errors = {};
-    if (!String(data.get("name") ?? "").trim()) next.name = "Vui lòng nhập họ và tên.";
-    if (!/^(0|\+84)\d{9,10}$/.test(String(data.get("phone") ?? "").replace(/\s/g, "")))
-      next.phone = "Số điện thoại chưa đúng.";
-    if (!String(data.get("address") ?? "").trim()) next.address = "Vui lòng nhập địa chỉ nhận hàng.";
-    setErrors(next);
-    const firstInvalid = (["name", "phone", "address"] as const).find((k) => next[k]);
-    if (firstInvalid) {
-      (form.elements.namedItem(firstInvalid) as HTMLElement | null)?.focus();
-      return;
-    }
-    // TODO: gửi đơn hàng lên API khi có backend; hiện chỉ xoá giỏ và chuyển trang.
-    cart.clear();
-    router.push("/dat-hang-thanh-cong");
-  }
-
-  const bind = (key: keyof Errors) => ({
+  const errors = state.errors ?? {};
+  const value = (k: string) => state.values?.[k] ?? "";
+  const bind = (key: keyof typeof errors) => ({
+    defaultValue: value(key),
     "aria-invalid": errors[key] ? true : undefined,
     "aria-describedby": errors[key] ? `${key}-error` : undefined,
   });
 
   return (
     <form
-      onSubmit={onSubmit}
-      noValidate
+      action={formAction}
       className="grid grid-cols-[minmax(0,1fr)] gap-4 md:grid-cols-[minmax(0,1fr)_380px] md:items-start md:gap-8"
     >
+      <input
+        type="hidden"
+        name="items"
+        value={JSON.stringify(items.map((i) => ({ variantId: i.id, qty: i.qty })))}
+      />
+      <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+        <label>
+          Website
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
+
       <div className="space-y-4">
         <section className="rounded-xl bg-white p-4 ring-1 ring-line">
           <h2 className="mb-3 text-base font-bold">Sản phẩm ({items.length})</h2>
           <ul className="flex flex-col gap-4">
             {items.map((it) => (
               <li key={it.id} className="flex gap-3">
-                <ImagePlaceholder label="Ảnh" className="!w-20 shrink-0 !text-[11px] !rounded-lg" />
+                {it.image ? (
+                  <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-mist">
+                    <Image src={it.image} alt={it.name} fill sizes="80px" className="object-cover" />
+                  </div>
+                ) : (
+                  <ImagePlaceholder label="Ảnh" className="!w-20 shrink-0 !text-[11px] !rounded-lg" />
+                )}
                 <div className="min-w-0 flex-1">
                   <Link href={`/san-pham/${it.slug}`} className="text-sm font-semibold leading-snug hover:underline">
                     {it.name}
@@ -117,14 +110,14 @@ export function CartView() {
                   {it.variant && <p className="mb-1.5 text-[13px] text-subtle">{it.variant}</p>}
                   <div className="flex items-center justify-between gap-2">
                     <QuantityStepper value={it.qty} onChange={(q) => cart.setQty(it.id, q)} />
-                    <span className="font-bold text-cta">{formatPrice(it.price * it.qty)}</span>
+                    <span className="font-bold text-price">{formatPrice(it.price * it.qty)}</span>
                   </div>
                 </div>
                 <button
                   type="button"
                   aria-label={`Xoá ${it.name}`}
                   onClick={() => cart.remove(it.id)}
-                  className="-mr-2 -mt-2 flex size-11 shrink-0 items-start justify-end text-subtle hover:text-cta"
+                  className="-mr-2 -mt-2 flex size-11 shrink-0 items-start justify-end text-subtle hover:text-price"
                 >
                   <span className="flex size-11 items-center justify-center">
                     <CloseIcon size={20} />
@@ -153,11 +146,23 @@ export function CartView() {
                 {...bind("phone")}
               />
             </Field>
-            <Field id="province" label="Tỉnh / Thành phố">
-              <input id="province" name="province" autoComplete="address-level1" className={inputClass} />
+            <Field id="province" label="Tỉnh / Thành phố" error={errors.province}>
+              <input
+                id="province"
+                name="province"
+                autoComplete="address-level1"
+                className={inputClass}
+                {...bind("province")}
+              />
             </Field>
-            <Field id="district" label="Quận / Huyện, Phường / Xã">
-              <input id="district" name="district" autoComplete="address-level2" className={inputClass} />
+            <Field id="district" label="Quận / Huyện, Phường / Xã" error={errors.district}>
+              <input
+                id="district"
+                name="district"
+                autoComplete="address-level2"
+                className={inputClass}
+                {...bind("district")}
+              />
             </Field>
             <Field id="address" label="Địa chỉ cụ thể" error={errors.address}>
               <input
@@ -168,43 +173,28 @@ export function CartView() {
                 {...bind("address")}
               />
             </Field>
-            <Field id="note" label="Ghi chú (không bắt buộc)">
+            <Field id="note" label="Ghi chú (không bắt buộc)" error={errors.note}>
               <textarea
                 id="note"
                 name="note"
                 rows={2}
+                defaultValue={value("note")}
                 className="w-full rounded-lg border border-edge px-3 py-2.5 text-base outline-none focus:border-teal"
               />
             </Field>
           </div>
         </section>
 
-        <fieldset className="rounded-xl bg-white p-4 ring-1 ring-line">
-          <legend className="float-left mb-3 w-full text-base font-bold">Thanh toán</legend>
-          <div className="clear-both flex flex-col gap-2">
-            {payments.map((m) => (
-              <label
-                key={m.id}
-                className={`flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border-2 px-3 py-2 ${
-                  payment === m.id ? "border-navy bg-mist" : "border-line"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="payment"
-                  value={m.id}
-                  checked={payment === m.id}
-                  onChange={() => setPayment(m.id)}
-                  className="size-5 accent-navy"
-                />
-                <span>
-                  <span className="block text-sm font-semibold">{m.name}</span>
-                  <span className="block text-[13px] text-muted">{m.hint}</span>
-                </span>
-              </label>
-            ))}
+        <section className="rounded-xl bg-white p-4 ring-1 ring-line">
+          <h2 className="mb-3 text-base font-bold">Thanh toán</h2>
+          <div className="flex min-h-14 items-center gap-3 rounded-lg border-2 border-navy bg-mist px-3 py-2">
+            <CheckIcon size={20} className="shrink-0 text-navy" />
+            <p>
+              <span className="block text-sm font-semibold">Thanh toán khi nhận hàng (COD)</span>
+              <span className="block text-[13px] text-muted">Kiểm tra hàng rồi mới trả tiền</span>
+            </p>
           </div>
-        </fieldset>
+        </section>
       </div>
 
       <aside className="rounded-xl bg-white p-4 ring-1 ring-line md:sticky md:top-24">
@@ -220,9 +210,14 @@ export function CartView() {
           </div>
           <div className="mt-1 flex justify-between border-t border-line pt-3 text-[17px] font-extrabold">
             <dt>Tổng cộng</dt>
-            <dd className="text-cta">{formatPrice(total)}</dd>
+            <dd className="text-price">{formatPrice(total)}</dd>
           </div>
         </dl>
+        {state.message && (
+          <p role="alert" className="mt-4 rounded-lg bg-[#fdeee6] px-3 py-2 text-sm font-medium text-price">
+            {state.message}
+          </p>
+        )}
         <p className="mt-4 text-xs text-muted">
           Bằng việc đặt hàng, bạn đồng ý với{" "}
           <Link href="/chinh-sach/thanh-toan" className="text-teal underline">
@@ -236,9 +231,10 @@ export function CartView() {
         </p>
         <button
           type="submit"
-          className="mt-4 hidden h-[52px] w-full items-center justify-between rounded-lg bg-cta px-4 text-base font-bold text-white hover:bg-cta-dark md:flex"
+          disabled={pending}
+          className="mt-4 hidden h-[52px] w-full items-center justify-between rounded-lg bg-cta px-4 text-base font-bold text-white hover:bg-cta-dark disabled:opacity-60 md:flex"
         >
-          <span>Đặt hàng</span>
+          <span>{pending ? "Đang gửi…" : "Đặt hàng"}</span>
           <span>{formatPrice(total)}</span>
         </button>
       </aside>
@@ -246,9 +242,10 @@ export function CartView() {
       <div className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-white px-3 py-2 md:hidden">
         <button
           type="submit"
-          className="flex h-[52px] w-full items-center justify-between rounded-lg bg-cta px-4 text-base font-bold text-white"
+          disabled={pending}
+          className="flex h-[52px] w-full items-center justify-between rounded-lg bg-cta px-4 text-base font-bold text-white disabled:opacity-60"
         >
-          <span>Đặt hàng</span>
+          <span>{pending ? "Đang gửi…" : "Đặt hàng"}</span>
           <span>{formatPrice(total)}</span>
         </button>
       </div>

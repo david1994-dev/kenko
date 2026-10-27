@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KENKO store
 
-## Getting Started
+Next.js (App Router) storefront for KENKO. Products, orders and customers live in Postgres; product images live in Vercel Blob. Checkout is cash on delivery with no customer login.
 
-First, run the development server:
+## Run locally
 
 ```bash
+cp .env.example .env.local   # then fill in the values
+npm install
+npm run db:migrate           # create tables
+npm run db:seed              # load the sample catalog (safe to re-run)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Without `BLOB_READ_WRITE_TOKEN`, images uploaded in `/admin` are saved to `public/uploads` (dev only).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Name | Purpose |
+| --- | --- |
+| `DATABASE_URL` | Postgres connection string (use the pooled URL on Neon) |
+| `ADMIN_PASSWORD` | Password for `/admin` |
+| `SESSION_SECRET` | Random string of 32+ characters that signs the admin cookie |
+| `BLOB_READ_WRITE_TOKEN` | Added automatically when a Blob store is connected in Vercel |
+| `NEXT_PUBLIC_SITE_URL` | Public URL, used in sitemap, canonical links and structured data |
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Create a Postgres database (Storage → Neon) and a Blob store (Storage → Blob) and connect both to the project.
+2. Add `ADMIN_PASSWORD`, `SESSION_SECRET` and `NEXT_PUBLIC_SITE_URL` in Settings → Environment Variables.
+3. Create the tables and load the sample catalog against the production database:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   DATABASE_URL="<production url>" npm run db:migrate
+   DATABASE_URL="<production url>" npm run db:seed
+   ```
+
+4. Deploy. Manage orders and product images at `/admin`.
+
+## Database
+
+Schema: `src/db/schema.ts`. After changing it, run `npm run db:generate` and commit the new file in `drizzle/`.

@@ -3,7 +3,7 @@ import { Breadcrumbs, type Crumb } from "./breadcrumbs";
 import { JsonLd } from "./json-ld";
 import { ProductList } from "./product-list";
 import { Container, ProseBlock } from "./ui";
-import type { Product } from "@/data/catalog";
+import type { Product } from "@/lib/types";
 import { absoluteUrl } from "@/lib/site";
 
 type Chip = { label: string; href: string; active?: boolean };

@@ -1,20 +1,27 @@
+import Image from "next/image";
 import Link from "next/link";
 import { policies } from "@/data/content";
 import { site } from "@/lib/site";
 
 export function Footer() {
   return (
-    <footer className="bg-ink pb-24 text-sm text-[#d5e8f2] md:pb-0">
+    <footer className="bg-ink pb-24 text-sm text-[#e6e9f2] md:pb-0">
       <div className="mx-auto grid w-full max-w-[1200px] gap-8 px-4 py-8 md:grid-cols-4 md:px-6 md:py-10">
         <div>
-          <div className="mb-2 text-[22px] font-extrabold tracking-[0.16em] text-white">{site.name}</div>
+          <Image
+            src="/logo.png"
+            alt="KENKO STORE"
+            width={640}
+            height={326}
+            className="mb-3 h-16 w-auto rounded-lg"
+          />
           <p>Hotline {site.hotline}</p>
           <p>{site.email}</p>
           <p>{site.hours}</p>
         </div>
 
         <div>
-          <h2 className="mb-2 font-bold text-white">Cửa hàng</h2>
+          <h2 className="mb-2 font-bold text-brand">Cửa hàng</h2>
           <ul className="space-y-1">
             {site.stores.map((s) => (
               <li key={s.city}>
@@ -25,7 +32,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h2 className="mb-2 font-bold text-white">Chính sách</h2>
+          <h2 className="mb-2 font-bold text-brand">Chính sách</h2>
           <ul>
             {policies.map((p) => (
               <li key={p.slug}>
@@ -38,7 +45,7 @@ export function Footer() {
         </div>
 
         <div>
-          <h2 className="mb-2 font-bold text-white">Mua trên</h2>
+          <h2 className="mb-2 font-bold text-brand">Mua trên</h2>
           <ul>
             {site.marketplaces.map((m) => (
               <li key={m.name}>
@@ -50,7 +57,7 @@ export function Footer() {
           </ul>
         </div>
       </div>
-      <div className="border-t border-[#2b4468] px-4 py-4 text-center text-xs text-[#9fb6cc]">
+      <div className="border-t border-white/15 px-4 py-4 text-center text-xs text-[#aab0c4]">
         © {site.year} {site.name} · {site.company}
       </div>
     </footer>

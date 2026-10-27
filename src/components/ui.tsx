@@ -1,7 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { discountPercent, formatPrice } from "@/lib/format";
-import type { Product } from "@/data/catalog";
+import type { Product } from "@/lib/types";
 
 export function ImagePlaceholder({
   label = "Ảnh sản phẩm",
@@ -16,7 +17,7 @@ export function ImagePlaceholder({
 }) {
   return (
     <div
-      className={`relative flex ${ratio} w-full items-center justify-center rounded-xl bg-mist px-2 text-center text-xs text-[#3f5666] ${className}`}
+      className={`relative flex ${ratio} w-full items-center justify-center rounded-xl bg-mist px-2 text-center text-xs text-muted ${className}`}
     >
       {label}
       {children}
@@ -35,7 +36,7 @@ export function Price({
   const old = size === "lg" ? "text-[15px]" : "text-[13px]";
   return (
     <div className="flex flex-wrap items-baseline gap-x-2">
-      <span className={`${main} text-cta`}>{formatPrice(product.salePrice ?? product.price)}</span>
+      <span className={`${main} text-price`}>{formatPrice(product.salePrice ?? product.price)}</span>
       {product.salePrice ? (
         <span className={`${old} text-subtle line-through`}>{formatPrice(product.price)}</span>
       ) : null}
@@ -46,9 +47,41 @@ export function Price({
 export function DiscountBadge({ product }: { product: Pick<Product, "price" | "salePrice"> }) {
   if (!product.salePrice) return null;
   return (
-    <span className="absolute left-2 top-2 rounded-md bg-cta px-2 py-0.5 text-xs font-bold text-white">
+    <span className="absolute left-2 top-2 rounded-md bg-price px-2 py-0.5 text-xs font-bold text-white">
       -{discountPercent(product.price, product.salePrice)}%
     </span>
+  );
+}
+
+export function ProductThumb({
+  product,
+  sizes = "(min-width: 768px) 25vw, 50vw",
+  priority = false,
+  className = "",
+  children,
+}: {
+  product: Pick<Product, "name" | "images">;
+  sizes?: string;
+  priority?: boolean;
+  className?: string;
+  children?: ReactNode;
+}) {
+  const image = product.images[0];
+  if (!image) {
+    return <ImagePlaceholder className={className}>{children}</ImagePlaceholder>;
+  }
+  return (
+    <div className={`relative aspect-square w-full overflow-hidden rounded-xl bg-mist ${className}`}>
+      <Image
+        src={image.url}
+        alt={image.alt || product.name}
+        fill
+        sizes={sizes}
+        priority={priority}
+        className="object-cover"
+      />
+      {children}
+    </div>
   );
 }
 
@@ -59,9 +92,9 @@ export function ProductCard({ product, priority = false }: { product: Product; p
       prefetch={priority}
       className="group flex flex-col gap-1.5"
     >
-      <ImagePlaceholder className="transition-colors group-hover:bg-[#d3ebf3]">
+      <ProductThumb product={product} className="transition-colors group-hover:bg-[#ffe8bd]">
         <DiscountBadge product={product} />
-      </ImagePlaceholder>
+      </ProductThumb>
       <h3 className="text-sm font-semibold leading-snug md:text-[15px]">{product.name}</h3>
       {product.colors.length > 0 && (
         <ul className="flex gap-1.5" aria-label="Màu sắc">
@@ -120,13 +153,14 @@ export function ButtonLink({
 }: {
   href: string;
   children: ReactNode;
-  variant?: "primary" | "outline" | "outline-light";
+  variant?: "primary" | "outline" | "outline-light" | "outline-on-brand";
   className?: string;
 }) {
   const styles = {
     primary: "bg-cta text-white hover:bg-cta-dark",
     outline: "border-2 border-navy text-navy hover:bg-mist",
     "outline-light": "border-2 border-white text-white hover:bg-white/10",
+    "outline-on-brand": "border-2 border-navy text-navy hover:bg-white/50",
   }[variant];
   return (
     <Link

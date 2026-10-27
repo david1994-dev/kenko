@@ -8,7 +8,7 @@ const items = [
 
 export function TrustBanner() {
   return (
-    <section aria-label="Cam kết của KENKO" className="bg-teal text-white">
+    <section aria-label="Cam kết của KENKO" className="bg-navy text-white">
       <ul className="mx-auto grid w-full max-w-[1200px] gap-1 px-4 py-3 md:grid-cols-3 md:gap-6 md:px-6 md:py-4">
         {items.map(({ icon: Icon, title, sub }) => (
           <li key={title} className="flex items-center gap-3 md:justify-center">

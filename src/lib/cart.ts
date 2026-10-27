@@ -7,9 +7,10 @@ export type CartItem = {
   variant: string;
   price: number;
   qty: number;
+  image?: string;
 };
 
-const KEY = "kenko-cart";
+const KEY = "kenko-cart-v2";
 const EMPTY: CartItem[] = [];
 
 let items: CartItem[] | null = null;

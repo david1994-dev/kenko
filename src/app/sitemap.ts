@@ -1,11 +1,10 @@
 import type { MetadataRoute } from "next";
 import { articles, industries, policies } from "@/data/content";
-import { categories, products } from "@/data/catalog";
+import { getCategories, getProducts } from "@/lib/catalog";
 import { absoluteUrl } from "@/lib/site";
 
 const staticPaths = [
   "/",
-  "/ao-dieu-hoa",
   "/giam-gia",
   "/giai-phap",
   "/tin-tuc",
@@ -15,7 +14,8 @@ const staticPaths = [
   "/lien-he",
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [categories, products] = await Promise.all([getCategories(), getProducts()]);
   const paths = [
     ...staticPaths,
     ...categories.map((c) => c.href),

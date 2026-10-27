@@ -1,11 +1,27 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { CartIcon, ChevronRightIcon, CloseIcon, MenuIcon, SearchIcon } from "./icons";
 import { cartCount, useCart } from "@/lib/cart";
 import { mainNav } from "@/data/content";
 import { site } from "@/lib/site";
+
+function Logo({ priority = false }: { priority?: boolean }) {
+  return (
+    <Link href="/" aria-label={`${site.name} - Trang chủ`} className="flex shrink-0 items-center">
+      <Image
+        src="/logo.png"
+        alt="KENKO STORE"
+        width={640}
+        height={326}
+        priority={priority}
+        className="h-[52px] w-auto lg:h-[64px]"
+      />
+    </Link>
+  );
+}
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -24,8 +40,8 @@ export function Header() {
   }, [menuOpen]);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-white">
-      <div className="mx-auto flex h-14 w-full max-w-[1200px] items-center justify-between px-2 lg:h-[72px] lg:gap-8 lg:px-6">
+    <header className="sticky top-0 z-40 border-b border-brand-deep bg-brand">
+      <div className="mx-auto flex h-16 w-full max-w-[1200px] items-center justify-between px-2 lg:h-[84px] lg:gap-8 lg:px-6">
         <button
           type="button"
           aria-label="Mở menu"
@@ -36,13 +52,15 @@ export function Header() {
           <MenuIcon />
         </button>
 
-        <Link href="/" className="text-[22px] font-extrabold tracking-[0.16em] text-navy lg:text-[26px]">
-          {site.name}
-        </Link>
+        <Logo priority />
 
         <nav aria-label="Menu chính" className="hidden flex-1 items-center gap-6 text-[15px] font-semibold lg:flex">
           {mainNav.map((item) => (
-            <Link key={item.href} href={item.href} className="flex min-h-11 items-center whitespace-nowrap hover:text-teal">
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex min-h-11 items-center whitespace-nowrap hover:underline"
+            >
               {item.label}
             </Link>
           ))}
@@ -51,7 +69,7 @@ export function Header() {
         <form
           action="/tim-kiem"
           role="search"
-          className="hidden h-11 w-60 items-center gap-2 rounded-full border border-edge px-4 text-sm lg:flex"
+          className="hidden h-11 w-60 items-center gap-2 rounded-full bg-white px-4 text-sm lg:flex"
         >
           <SearchIcon size={18} />
           <input
@@ -80,7 +98,7 @@ export function Header() {
           >
             <CartIcon />
             {count > 0 && (
-              <span className="absolute right-0.5 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-cta px-1 text-[11px] font-bold text-white">
+              <span className="absolute right-0.5 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-price px-1 text-[11px] font-bold text-white">
                 {count}
               </span>
             )}
@@ -89,14 +107,14 @@ export function Header() {
       </div>
 
       {searchOpen && (
-        <form action="/tim-kiem" role="search" className="border-t border-line bg-white p-3 lg:hidden">
+        <form action="/tim-kiem" role="search" className="border-t border-brand-deep bg-brand p-3 lg:hidden">
           <input
             name="q"
             type="search"
             autoFocus
             aria-label="Tìm sản phẩm"
             placeholder="Tìm áo điều hoà, phụ kiện…"
-            className="h-12 w-full rounded-lg border border-edge px-3 text-base outline-none focus:border-teal"
+            className="h-12 w-full rounded-lg border border-edge bg-white px-3 text-base outline-none focus:border-navy"
           />
         </form>
       )}
@@ -110,8 +128,8 @@ export function Header() {
             className="absolute inset-0 bg-ink/50"
           />
           <div className="absolute inset-y-0 left-0 flex w-[84%] max-w-[340px] flex-col bg-white shadow-xl">
-            <div className="flex h-14 items-center justify-between border-b border-line px-2 pl-4">
-              <span className="text-[22px] font-extrabold tracking-[0.16em] text-navy">{site.name}</span>
+            <div className="flex h-16 items-center justify-between bg-brand pl-3 pr-2">
+              <Logo />
               <button
                 type="button"
                 aria-label="Đóng menu"
@@ -127,10 +145,10 @@ export function Header() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMenuOpen(false)}
-                  className="flex min-h-12 items-center justify-between px-4 text-base font-semibold hover:bg-ground"
+                  className="flex min-h-12 items-center justify-between px-4 text-base font-semibold hover:bg-mist"
                 >
                   {item.label}
-                  <ChevronRightIcon size={18} className="text-teal" />
+                  <ChevronRightIcon size={18} className="text-navy" />
                 </Link>
               ))}
             </nav>

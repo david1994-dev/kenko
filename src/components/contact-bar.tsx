@@ -24,13 +24,13 @@ export function ContactBar() {
       </a>
       <a
         href={site.zaloHref}
-        className="flex h-11 items-center justify-center rounded-lg bg-navy text-sm font-bold text-white"
+        className="flex h-11 items-center justify-center rounded-lg bg-teal text-sm font-bold text-white"
       >
         Zalo
       </a>
       <a
         href={site.messengerHref}
-        className="flex h-11 items-center justify-center rounded-lg bg-teal text-sm font-bold text-white"
+        className="flex h-11 items-center justify-center rounded-lg bg-ink text-sm font-bold text-white"
       >
         Messenger
       </a>

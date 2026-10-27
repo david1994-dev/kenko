@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Product } from "@/data/catalog";
+import type { Product } from "@/lib/types";
 import { ProductCard } from "./ui";
 
 export type Tab = { id: string; label: string; products: Product[] };

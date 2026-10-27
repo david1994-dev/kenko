@@ -3,7 +3,8 @@
 import { useMemo, useState } from "react";
 import { CheckIcon, ChevronDownIcon, CloseIcon, FilterIcon } from "./icons";
 import { ProductCard } from "./ui";
-import { currentPrice, type Product } from "@/data/catalog";
+import { currentPrice } from "@/lib/price";
+import type { Product } from "@/lib/types";
 import { discountPercent } from "@/lib/format";
 
 const sorts = [
@@ -53,7 +54,7 @@ export function ProductList({ products }: { products: Product[] }) {
 
   return (
     <div>
-      <div className="sticky top-14 z-30 -mx-4 grid grid-cols-2 border-y border-line bg-white md:static md:mx-0 md:flex md:items-center md:justify-between md:border-0 md:pb-4">
+      <div className="sticky top-16 z-30 -mx-4 grid grid-cols-2 border-y border-line bg-white md:static md:mx-0 md:flex md:items-center md:justify-between md:border-0 md:pb-4">
         {showFilter ? (
           <button
             type="button"
