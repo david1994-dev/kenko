@@ -1,69 +1,174 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { BestSellers } from "@/components/best-sellers";
+import { ChevronRightIcon, ShieldIcon, TruckIcon, WindIcon } from "@/components/icons";
+import { ButtonLink, Container, ImagePlaceholder, SectionHeading } from "@/components/ui";
+import { articles, howItWorks, industries } from "@/data/content";
+import { categories, products } from "@/data/catalog";
+import { formatDate } from "@/lib/format";
+import { site } from "@/lib/site";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: { absolute: `${site.name} - Áo điều hoà làm mát, áo sưởi ấm, máy hút ẩm` },
+  description: site.description,
+  alternates: { canonical: "/" },
+};
+
+const trust = [
+  { icon: WindIcon, label: "Làm mát chủ động" },
+  { icon: ShieldIcon, label: "Bảo hành chính hãng" },
+  { icon: TruckIcon, label: "Giao hàng toàn quốc" },
+];
+
+const bestSellerTabs = [
+  { id: "dai-tay", label: "Dài tay" },
+  { id: "ngan-tay", label: "Ngắn tay" },
+  { id: "phu-kien", label: "Phụ kiện" },
+].map((t) => ({
+  ...t,
+  products: products
+    .filter((p) => p.category === t.id)
+    .sort((a, b) => b.sold - a.sold)
+    .slice(0, 4),
+}));
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+    <>
+      <section className="bg-navy text-white">
+        <Container className="flex flex-col gap-8 py-6 md:flex-row md:items-center md:gap-12 md:py-14">
+          <div className="md:flex-1">
+            <p className="mb-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-[#9fd3e6] md:text-sm">
+              {site.tagline}
+            </p>
+            <h1 className="mb-3 text-[28px] font-extrabold leading-tight md:mb-4 md:text-[44px] md:leading-[1.15]">
+              Mát suốt ca làm việc, dù ngoài trời nắng gắt
+            </h1>
+            <p className="mb-5 max-w-[520px] text-[15px] text-[#d5e8f2] md:mb-7 md:text-[17px]">
+              Luồng khí lưu thông trong áo giúp cơ thể khô thoáng. Dành cho công nhân, kỹ sư, người
+              đi đường dài.
+            </p>
+            <div className="flex gap-3">
+              <ButtonLink href="/ao-dieu-hoa" className="flex-1 md:flex-none md:px-8">
+                Mua ngay
+              </ButtonLink>
+              <ButtonLink
+                href="/huong-dan-chon-size"
+                variant="outline-light"
+                className="flex-1 md:flex-none md:px-8"
+              >
+                Tư vấn chọn size
+              </ButtonLink>
+            </div>
+          </div>
+          <div className="md:flex-1">
+            <ImagePlaceholder
+              label="Ảnh banner · người mặc áo điều hoà"
+              ratio="aspect-[16/10]"
+              className="!bg-[#14527a] !text-[#cfe6f2]"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
+        </Container>
+      </section>
+
+      <Container className="pt-5 md:pt-10">
+        <SectionHeading title="Danh mục" />
+        <div className="grid grid-cols-3 gap-3 md:grid-cols-6 md:gap-4">
+          {[...categories, { id: "giam-gia", name: "Giảm giá", href: "/giam-gia" }].map((c) => (
+            <Link key={c.id} href={c.href} className="flex flex-col items-center gap-1.5 text-center">
+              <ImagePlaceholder label="Ảnh" className="!text-[11px]" />
+              <span className="text-[13px] font-semibold leading-tight md:text-[15px]">{c.name}</span>
+            </Link>
+          ))}
         </div>
-      </main>
-    </div>
+      </Container>
+
+      <Container className="py-4 md:py-6">
+        <ul className="grid grid-cols-3 gap-1 rounded-xl bg-ground px-2 py-3.5 text-center">
+          {trust.map(({ icon: Icon, label }) => (
+            <li key={label} className="flex flex-col items-center gap-1.5 text-teal">
+              <Icon size={28} strokeWidth={1.8} />
+              <span className="text-xs font-semibold leading-tight text-ink md:text-sm">{label}</span>
+            </li>
+          ))}
+        </ul>
+      </Container>
+
+      <Container className="py-2 md:py-4">
+        <SectionHeading title="Bán chạy" href="/ao-dieu-hoa" />
+        <BestSellers tabs={bestSellerTabs} />
+      </Container>
+
+      <section className="mt-6 bg-ground py-6 md:mt-12 md:py-12">
+        <Container>
+          <h2 className="mb-4 text-lg font-bold md:mb-6 md:text-2xl md:font-extrabold">
+            Áo điều hoà hoạt động thế nào?
+          </h2>
+          <ol className="grid gap-4 md:grid-cols-3 md:gap-6">
+            {howItWorks.map((s, i) => (
+              <li key={s.title} className="flex items-start gap-3">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-teal font-bold text-white">
+                  {i + 1}
+                </span>
+                <div>
+                  <h3 className="font-bold">{s.title}</h3>
+                  <p className="text-sm text-muted md:text-[15px]">{s.body}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <ButtonLink href="/huong-dan-chon-size" variant="outline" className="mt-5 md:inline-flex">
+            Hướng dẫn chọn size
+          </ButtonLink>
+        </Container>
+      </section>
+
+      <Container className="pt-6 md:pt-12">
+        <SectionHeading title="Giải pháp theo ngành" href="/giai-phap" />
+        <ul className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
+          {industries.map((i) => (
+            <li key={i.slug}>
+              <Link
+                href={`/giai-phap/${i.slug}`}
+                className="flex min-h-12 items-center justify-between rounded-lg border border-line px-3 text-sm font-semibold hover:bg-mist md:min-h-14 md:px-4 md:text-[15px]"
+              >
+                {i.name}
+                <ChevronRightIcon size={16} strokeWidth={2.5} className="text-teal" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Container>
+
+      <Container className="pt-6 md:pt-12">
+        <SectionHeading title="Khách hàng nói gì" />
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {["Ảnh phản hồi 1", "Ảnh phản hồi 2", "Ảnh phản hồi 3", "Ảnh phản hồi 4"].map((l) => (
+            <ImagePlaceholder key={l} label={l} ratio="aspect-[3/4]" />
+          ))}
+        </div>
+      </Container>
+
+      <Container className="py-6 md:py-12">
+        <SectionHeading title="Tin tức & hướng dẫn" href="/tin-tuc" />
+        <div className="flex flex-col gap-3 md:grid md:grid-cols-3 md:gap-6">
+          {articles.map((a) => (
+            <Link key={a.slug} href={`/tin-tuc/${a.slug}`} className="flex items-center gap-3 md:flex-col md:items-stretch md:gap-2">
+              <ImagePlaceholder
+                label="Ảnh"
+                ratio="aspect-[4/3]"
+                className="!w-24 shrink-0 !text-[11px] !rounded-lg md:!w-full md:!aspect-video md:!rounded-xl"
+              />
+              <div>
+                <h3 className="text-sm font-semibold leading-snug md:text-base">{a.title}</h3>
+                <time dateTime={a.date} className="text-xs text-subtle md:text-[13px]">
+                  {formatDate(a.date)}
+                </time>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </Container>
+    </>
   );
 }
