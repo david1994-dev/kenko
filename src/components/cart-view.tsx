@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { CheckIcon, CloseIcon } from "./icons";
 import { QuantityStepper } from "./quantity-stepper";
+import { Spinner } from "./spinner";
 import { ImagePlaceholder } from "./ui";
 import { placeOrder, type OrderFormState } from "@/app/(shop)/gio-hang/actions";
 import { cart, cartTotal, useCart, useHydrated } from "@/lib/cart";
@@ -234,7 +235,7 @@ export function CartView() {
           disabled={pending}
           className="mt-4 hidden h-[52px] w-full items-center justify-between rounded-lg bg-cta px-4 text-base font-bold text-white hover:bg-cta-dark disabled:opacity-60 md:flex"
         >
-          <span>{pending ? "Đang gửi…" : "Đặt hàng"}</span>
+          <span className="inline-flex items-center gap-2">{pending && <Spinner />}{pending ? "Đang gửi…" : "Đặt hàng"}</span>
           <span>{formatPrice(total)}</span>
         </button>
       </aside>
@@ -245,7 +246,7 @@ export function CartView() {
           disabled={pending}
           className="flex h-[52px] w-full items-center justify-between rounded-lg bg-cta px-4 text-base font-bold text-white disabled:opacity-60"
         >
-          <span>{pending ? "Đang gửi…" : "Đặt hàng"}</span>
+          <span className="inline-flex items-center gap-2">{pending && <Spinner />}{pending ? "Đang gửi…" : "Đặt hàng"}</span>
           <span>{formatPrice(total)}</span>
         </button>
       </div>

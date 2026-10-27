@@ -7,6 +7,8 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { formatPrice } from "@/lib/format";
 import { formatDateTime, statusLabel, type StatusKey } from "@/lib/order-status";
 
+export const instant = false;
+
 export const metadata: Metadata = { title: "Đơn hàng" };
 
 export default async function Page({ searchParams }: PageProps<"/admin/orders">) {

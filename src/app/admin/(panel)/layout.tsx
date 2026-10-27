@@ -1,6 +1,9 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { logout } from "../actions";
+import { SubmitButton } from "@/components/submit-button";
+
+export const instant = false;
 
 export default function PanelLayout({ children }: LayoutProps<"/admin">) {
   return (
@@ -19,9 +22,9 @@ export default function PanelLayout({ children }: LayoutProps<"/admin">) {
             </Link>
           </nav>
           <form action={logout}>
-            <button type="submit" className="min-h-11 text-sm font-semibold hover:underline">
+            <SubmitButton pendingLabel="Đang thoát…" className="min-h-11 text-sm font-semibold hover:underline">
               Đăng xuất
-            </button>
+            </SubmitButton>
           </form>
         </div>
       </header>

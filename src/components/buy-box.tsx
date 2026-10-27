@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { QuantityStepper } from "./quantity-stepper";
+import { Spinner } from "./spinner";
 import { CheckIcon } from "./icons";
 import { cart } from "@/lib/cart";
 import { currentPrice, isAvailable } from "@/lib/price";
@@ -18,6 +19,7 @@ export function BuyBox({ product }: { product: Product }) {
   const [size, setSize] = useState<string | null>(sizes[Math.floor(sizes.length / 2)] ?? null);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [navigating, startNavigation] = useTransition();
 
   const find = (c: string | null, s: string | null) =>
     variants.find((v) => v.colorName === c && v.size === s && isAvailable(v));
@@ -47,10 +49,16 @@ export function BuyBox({ product }: { product: Product }) {
   }
 
   function handleBuyNow() {
-    if (addToCart()) router.push("/gio-hang");
+    if (addToCart()) startNavigation(() => router.push("/gio-hang"));
   }
 
   const disabled = !variant;
+  const buyNowLabel = (text: string) => (
+    <>
+      {navigating && <Spinner />}
+      {navigating ? "Đang chuyển…" : text}
+    </>
+  );
 
   return (
     <div>
@@ -138,11 +146,11 @@ export function BuyBox({ product }: { product: Product }) {
         </button>
         <button
           type="button"
-          disabled={disabled}
+          disabled={disabled || navigating}
           onClick={handleBuyNow}
-          className="h-12 flex-[1.2] rounded-lg bg-cta font-bold text-white hover:bg-cta-dark disabled:opacity-50"
+          className="flex h-12 flex-[1.2] items-center justify-center gap-2 rounded-lg bg-cta font-bold text-white hover:bg-cta-dark disabled:opacity-50"
         >
-          Mua ngay · {formatPrice(currentPrice(product) * qty)}
+          {buyNowLabel(`Mua ngay · ${formatPrice(currentPrice(product) * qty)}`)}
         </button>
       </div>
 
@@ -157,11 +165,11 @@ export function BuyBox({ product }: { product: Product }) {
         </button>
         <button
           type="button"
-          disabled={disabled}
+          disabled={disabled || navigating}
           onClick={handleBuyNow}
-          className="h-12 rounded-lg bg-cta font-bold text-white disabled:opacity-50"
+          className="flex h-12 items-center justify-center gap-2 rounded-lg bg-cta font-bold text-white disabled:opacity-50"
         >
-          Mua ngay
+          {buyNowLabel("Mua ngay")}
         </button>
       </div>
     </div>

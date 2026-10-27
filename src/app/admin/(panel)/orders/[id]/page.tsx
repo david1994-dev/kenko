@@ -8,6 +8,9 @@ import { requireAdmin } from "@/lib/admin-auth";
 import { formatPrice } from "@/lib/format";
 import { formatDateTime, statusLabel, type StatusKey } from "@/lib/order-status";
 import { updateOrderStatus } from "../actions";
+import { SubmitButton } from "@/components/submit-button";
+
+export const instant = false;
 
 export const metadata: Metadata = { title: "Chi tiết đơn hàng" };
 
@@ -94,9 +97,12 @@ export default async function Page({ params }: PageProps<"/admin/orders/[id]">) 
                   className="h-12 w-full rounded-lg border border-edge px-3 text-base"
                 />
               </div>
-              <button type="submit" className="h-12 rounded-lg bg-cta font-bold text-white hover:bg-cta-dark">
+              <SubmitButton
+                pendingLabel="Đang lưu…"
+                className="h-12 rounded-lg bg-cta font-bold text-white hover:bg-cta-dark"
+              >
                 Lưu trạng thái
-              </button>
+              </SubmitButton>
               <p className="text-xs text-subtle">Huỷ hoặc hoàn trả sẽ cộng lại tồn kho và không đổi lại được.</p>
             </form>
           )}

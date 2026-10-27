@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
+import { NavProgress } from "@/components/nav-progress";
 import { site } from "@/lib/site";
 
 const beVietnam = Be_Vietnam_Pro({
@@ -33,7 +35,12 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="vi" className={beVietnam.variable}>
-      <body>{children}</body>
+      <body>
+        <Suspense fallback={null}>
+          <NavProgress />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }

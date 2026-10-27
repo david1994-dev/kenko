@@ -6,6 +6,8 @@ import { db, schema } from "@/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { formatPrice } from "@/lib/format";
 
+export const instant = false;
+
 export const metadata: Metadata = { title: "Sản phẩm" };
 
 const statusText = { active: "Đang bán", draft: "Nháp", hidden: "Ẩn" } as const;

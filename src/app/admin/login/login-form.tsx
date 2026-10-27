@@ -1,4 +1,5 @@
 "use client";
+import { Spinner } from "@/components/spinner";
 
 import { useActionState } from "react";
 import { login, type LoginState } from "../actions";
@@ -25,8 +26,9 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="h-12 rounded-lg bg-cta font-bold text-white hover:bg-cta-dark disabled:opacity-60"
+        className="flex h-12 items-center justify-center gap-2 rounded-lg bg-cta font-bold text-white hover:bg-cta-dark disabled:opacity-60"
       >
+        {pending && <Spinner />}
         {pending ? "Đang đăng nhập…" : "Đăng nhập"}
       </button>
     </form>

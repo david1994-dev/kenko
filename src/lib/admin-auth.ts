@@ -2,6 +2,7 @@ import "server-only";
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
 const COOKIE = "kenko_admin";
 const MAX_AGE = 60 * 60 * 24 * 7;
@@ -47,6 +48,7 @@ export async function endSession() {
 export async function isAdmin() {
   const token = (await cookies()).get(COOKIE)?.value;
   if (!token) return false;
+  await connection();
   const [expRaw, sig] = token.split(".");
   const expires = Number(expRaw);
   if (!sig || !Number.isFinite(expires) || expires < Math.floor(Date.now() / 1000)) return false;

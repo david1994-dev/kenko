@@ -8,6 +8,9 @@ import { ProductForm, UploadForm } from "@/components/admin-product-forms";
 import { db, schema } from "@/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { deleteImage, makeCover, updateVariants } from "../actions";
+import { SubmitButton } from "@/components/submit-button";
+
+export const instant = false;
 
 export const metadata: Metadata = { title: "Sửa sản phẩm" };
 
@@ -66,16 +69,22 @@ export default async function Page({ params }: PageProps<"/admin/products/[id]">
                   {i > 0 && (
                     <form action={makeCover} className="flex-1">
                       <input type="hidden" name="imageId" value={img.id} />
-                      <button type="submit" className="h-10 w-full rounded-lg border border-edge text-xs font-semibold text-navy hover:bg-mist">
+                      <SubmitButton
+                        pendingLabel="Đang đổi…"
+                        className="h-10 w-full rounded-lg border border-edge text-xs font-semibold text-navy hover:bg-mist"
+                      >
                         Đặt làm bìa
-                      </button>
+                      </SubmitButton>
                     </form>
                   )}
                   <form action={deleteImage} className="flex-1">
                     <input type="hidden" name="imageId" value={img.id} />
-                    <button type="submit" className="h-10 w-full rounded-lg border border-edge text-xs font-semibold text-price hover:bg-[#fdeee6]">
+                    <SubmitButton
+                      pendingLabel="Đang xoá…"
+                      className="h-10 w-full rounded-lg border border-edge text-xs font-semibold text-price hover:bg-[#fdeee6]"
+                    >
                       Xoá
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               </li>
@@ -131,9 +140,12 @@ export default async function Page({ params }: PageProps<"/admin/products/[id]">
             </table>
           </div>
           <p className="mt-2 text-xs text-subtle">Để trống tồn kho nếu không muốn theo dõi số lượng. Khi nhập số, hệ thống tự trừ theo đơn hàng.</p>
-          <button type="submit" className="mt-3 h-12 rounded-lg bg-cta px-6 font-bold text-white hover:bg-cta-dark">
+          <SubmitButton
+            pendingLabel="Đang lưu…"
+            className="mt-3 h-12 rounded-lg bg-cta px-6 font-bold text-white hover:bg-cta-dark"
+          >
             Lưu phân loại
-          </button>
+          </SubmitButton>
         </form>
       </Card>
     </div>

@@ -1,4 +1,5 @@
 "use client";
+import { Spinner } from "./spinner";
 
 import { useActionState } from "react";
 import { updateProduct, uploadImages, type FormState } from "@/app/admin/(panel)/products/actions";
@@ -72,8 +73,9 @@ export function ProductForm({ product }: { product: ProductFormValues }) {
         <button
           type="submit"
           disabled={pending}
-          className="h-12 rounded-lg bg-cta px-6 font-bold text-white hover:bg-cta-dark disabled:opacity-60"
+          className="inline-flex h-12 items-center gap-2 rounded-lg bg-cta px-6 font-bold text-white hover:bg-cta-dark disabled:opacity-60"
         >
+          {pending && <Spinner />}
           {pending ? "Đang lưu…" : "Lưu sản phẩm"}
         </button>
         <Message state={state} />
@@ -103,8 +105,9 @@ export function UploadForm({ productId }: { productId: string }) {
         <button
           type="submit"
           disabled={pending}
-          className="h-12 rounded-lg border-2 border-navy px-6 font-bold text-navy hover:bg-mist disabled:opacity-60"
+          className="inline-flex h-12 items-center gap-2 rounded-lg border-2 border-navy px-6 font-bold text-navy hover:bg-mist disabled:opacity-60"
         >
+          {pending && <Spinner />}
           {pending ? "Đang tải lên…" : "Tải ảnh lên"}
         </button>
         <Message state={state} />
