@@ -27,8 +27,8 @@ export default async function Page() {
       <Card title="Ảnh hiện tại">
         {url ? (
           <div className="flex flex-wrap items-start gap-4">
-            <div className="relative aspect-[3/4] w-48 overflow-hidden rounded-2xl bg-mist">
-              <Image src={url} alt={map.get("hero_alt") ?? ""} fill sizes="192px" className="object-cover" />
+            <div className="relative aspect-[16/10] w-72 max-w-full overflow-hidden rounded-2xl bg-mist">
+              <Image src={url} alt={map.get("hero_alt") ?? ""} fill sizes="288px" className="object-cover" />
             </div>
             <form action={removeBanner}>
               <SubmitButton

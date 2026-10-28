@@ -57,11 +57,11 @@ export function AdminBannerForm({ hasImage, alt }: { hasImage: boolean; alt: str
           className="block w-full text-sm file:mr-3 file:h-11 file:rounded-lg file:border-0 file:bg-mist file:px-4 file:font-semibold file:text-navy"
         />
         <p className="mt-1 text-xs text-subtle">
-          Nên dùng ảnh dọc tỉ lệ 3:4 (ví dụ 1200×1600). Ảnh ngang sẽ bị cắt hai bên. Ảnh được tự thu nhỏ trước khi tải lên.
+          Nên dùng ảnh ngang tỉ lệ 16:10 (ví dụ 1600×1000). Ảnh khác tỉ lệ sẽ bị cắt bớt phần rìa. Ảnh được tự thu nhỏ trước khi tải lên.
         </p>
         {preview && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={preview} alt="Xem trước ảnh mới" className="mt-3 aspect-[3/4] w-40 rounded-xl object-cover" />
+          <img src={preview} alt="Xem trước ảnh mới" className="mt-3 aspect-[16/10] w-64 max-w-full rounded-xl object-cover" />
         )}
       </div>
       <div>

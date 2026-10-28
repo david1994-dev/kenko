@@ -35,7 +35,7 @@ export default async function HomePage() {
     <>
       <TrustBanner />
       <section className="bg-brand text-ink">
-        <Container className="flex flex-col gap-6 py-6 md:flex-row md:items-center md:justify-between md:gap-12 md:py-12">
+        <Container className="flex flex-col gap-6 py-6 md:flex-row md:items-center md:gap-12 md:py-12">
           <div className="md:max-w-xl md:flex-1">
             <p className="mb-2 text-[13px] font-bold uppercase tracking-[0.08em] text-navy md:text-sm">
               {site.tagline}
@@ -60,20 +60,20 @@ export default async function HomePage() {
               </ButtonLink>
             </div>
           </div>
-          <div className="mx-auto w-full max-w-[320px] shrink-0 md:mx-0 md:w-[380px] md:max-w-none">
-            <div className="relative aspect-[3/4] overflow-hidden rounded-3xl bg-white/50 shadow-lg ring-4 ring-white/60">
+          <div className="w-full md:max-w-[620px] md:flex-1">
+            <div className="relative aspect-[16/10] overflow-hidden rounded-2xl bg-white/50 shadow-lg ring-4 ring-white/60">
               {banner ? (
                 <Image
                   src={banner.url}
                   alt={banner.alt || "Người mặc áo điều hoà KENKO"}
                   fill
                   priority
-                  sizes="(min-width: 768px) 380px, 320px"
-                  className="object-cover object-[center_25%]"
+                  sizes="(min-width: 768px) 620px, 100vw"
+                  className="object-cover"
                 />
               ) : (
                 <div className="flex size-full items-center justify-center px-4 text-center text-sm text-ink">
-                  Ảnh banner dọc 3:4
+                  Ảnh banner ngang 16:10
                 </div>
               )}
             </div>
