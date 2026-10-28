@@ -1,4 +1,6 @@
 "use client";
+import { RichTextEditor } from "./rich-text-editor";
+import { descriptionToHtml } from "@/lib/rich-text";
 import { Spinner } from "./spinner";
 
 import { useActionState } from "react";
@@ -97,13 +99,7 @@ export function ProductForm({
       </div>
       <div className="md:col-span-2">
         <label htmlFor="description" className="mb-1 block text-sm font-semibold">Mô tả chi tiết</label>
-        <textarea
-          id="description"
-          name="description"
-          rows={6}
-          defaultValue={product.description}
-          className="w-full rounded-lg border border-edge px-3 py-2.5 text-base outline-none focus:border-teal"
-        />
+        <RichTextEditor id="description" name="description" initialHtml={descriptionToHtml(product.description)} />
       </div>
       <div className="flex items-center gap-3 md:col-span-2">
         <button

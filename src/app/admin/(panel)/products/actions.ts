@@ -8,6 +8,7 @@ import { db, schema } from "@/db";
 import { productStatuses } from "@/db/schema";
 import { requireAdmin } from "@/lib/admin-auth";
 import { removeImage, saveImage } from "@/lib/image-storage";
+import { sanitizeDescription } from "@/lib/sanitize";
 import { slugify } from "@/lib/slug";
 
 const { products, productVariants, productImages } = schema;
@@ -26,7 +27,7 @@ const productSchema = z
     name: z.string().trim().min(2, "Tên sản phẩm quá ngắn.").max(200),
     sku: z.string().trim().max(60),
     summary: z.string().trim().max(500),
-    description: z.string().trim().max(10000),
+    description: z.string().trim().max(30000, "Mô tả quá dài."),
     price: z.number().int("Giá phải là số nguyên.").min(0, "Giá không hợp lệ."),
     salePrice: z.number().int().min(0).nullable(),
     soldCount: z.number().int("Số đã bán phải là số nguyên.").min(0, "Số đã bán không hợp lệ."),
@@ -62,7 +63,9 @@ export async function updateProduct(_prev: FormState, data: FormData): Promise<F
   if (!parsed.success) return { message: parsed.error.issues[0].message };
 
   const { id, ...values } = parsed.data;
-  await db.update(products).set({ ...values, updatedAt: new Date() }).where(eq(products.id, id));
+  await db
+    .update(products)
+    .set({ ...values, description: sanitizeDescription(values.description), updatedAt: new Date() }).where(eq(products.id, id));
   touchCatalog(id);
   return { ok: true, message: "Đã lưu." };
 }
@@ -158,7 +161,7 @@ const createSchema = z
     categoryId: z.coerce.number().int("Vui lòng chọn danh mục.").positive("Vui lòng chọn danh mục."),
     sku: z.string().trim().max(40),
     summary: z.string().trim().max(500),
-    description: z.string().trim().max(10000),
+    description: z.string().trim().max(30000, "Mô tả quá dài."),
     giftNote: z.string().trim().max(500),
     price: z.number().int("Giá phải là số nguyên.").min(1, "Vui lòng nhập giá gốc."),
     salePrice: z.number().int().min(0).nullable(),
@@ -236,7 +239,7 @@ export async function createProduct(_prev: FormState, data: FormData): Promise<F
     id = await db.transaction(async (tx) => {
       const [product] = await tx
         .insert(products)
-        .values({ ...values, sku, slug, categoryId, soldCount: values.soldCount })
+        .values({ ...values, description: sanitizeDescription(values.description), sku, slug, categoryId, soldCount: values.soldCount })
         .returning({ id: products.id });
       await tx.insert(productVariants).values(
         colorOptions.flatMap((color, ci) =>

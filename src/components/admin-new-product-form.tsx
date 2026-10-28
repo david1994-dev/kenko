@@ -3,6 +3,7 @@
 import { useActionState, useTransition } from "react";
 import { createProduct, type FormState } from "@/app/admin/(panel)/products/actions";
 import { OptionFields } from "./admin-option-fields";
+import { RichTextEditor } from "./rich-text-editor";
 import { Spinner } from "./spinner";
 
 const field = "h-12 w-full rounded-lg border border-edge bg-white px-3 text-base outline-none focus:border-teal";
@@ -77,7 +78,7 @@ export function AdminNewProductForm({ categories }: { categories: { id: number; 
       </div>
       <div className="md:col-span-2">
         <label htmlFor="description" className="mb-1 block text-sm font-semibold">Mô tả chi tiết</label>
-        <textarea id="description" name="description" rows={6} className={area} />
+        <RichTextEditor id="description" name="description" initialHtml="" />
       </div>
       <div className="md:col-span-2">
         <label htmlFor="giftNote" className="mb-1 block text-sm font-semibold">Quà tặng miễn phí (để trống nếu không có)</label>

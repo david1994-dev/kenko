@@ -14,6 +14,7 @@ import { getProduct, getProductReviews, getProducts } from "@/lib/catalog";
 import { RatingLine, Stars } from "@/components/stars";
 import { formatRating, maskName } from "@/lib/format";
 import { publicSourceLabel } from "@/lib/review-source";
+import { sanitizeDescription } from "@/lib/sanitize";
 import { currentPrice } from "@/lib/price";
 import { absoluteUrl, site } from "@/lib/site";
 
@@ -142,7 +143,10 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
       <Container className="pt-6 md:pt-10">
         <div className="max-w-3xl border-t border-line">
           <Accordion title="Mô tả sản phẩm" open>
-            <p>{product.description}</p>
+            <div
+              className="rich"
+              dangerouslySetInnerHTML={{ __html: sanitizeDescription(product.description) }}
+            />
           </Accordion>
         </div>
       </Container>
