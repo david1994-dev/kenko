@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -80,7 +81,19 @@ export function BuyBox({ product }: { product: Product }) {
                   c.name === colorName ? "border-navy" : "border-line"
                 }`}
               >
-                <span className="block size-full rounded-full" style={{ background: c.hex }} />
+                {product.images.find((i) => i.colorName === c.name) ? (
+                  <span className="relative block size-full overflow-hidden rounded-full">
+                    <Image
+                      src={product.images.find((i) => i.colorName === c.name)!.url}
+                      alt=""
+                      fill
+                      sizes="44px"
+                      className="object-cover"
+                    />
+                  </span>
+                ) : (
+                  <span className="block size-full rounded-full" style={{ background: c.hex }} />
+                )}
               </button>
             ))}
           </div>

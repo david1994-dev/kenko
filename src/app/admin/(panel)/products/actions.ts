@@ -375,3 +375,49 @@ export async function uploadColorImage(_prev: FormState, data: FormData): Promis
   touchCatalog(productId);
   return { ok: true, message: "Đã lưu ảnh cho màu này." };
 }
+
+export async function updateColors(_prev: FormState, data: FormData): Promise<FormState> {
+  await requireAdmin();
+  const productId = z.uuid().parse(data.get("productId"));
+  const olds = data.getAll("oldName").map(String);
+  const news = data.getAll("newName").map((v) => String(v).trim());
+  const hexes = data.getAll("hex").map(String);
+  if (olds.length === 0 || olds.length !== news.length || olds.length !== hexes.length) {
+    return { message: "Dữ liệu màu không hợp lệ." };
+  }
+  if (news.some((n) => !n || n.length > 40)) return { message: "Tên màu không được để trống và tối đa 40 ký tự." };
+  if (new Set(news.map((n) => n.toLowerCase())).size !== news.length) return { message: "Hai màu không được trùng tên." };
+  if (hexes.some((h) => !HEX.test(h))) return { message: "Mã màu không hợp lệ." };
+
+  const existing = await db
+    .select({ name: productVariants.colorName })
+    .from(productVariants)
+    .where(eq(productVariants.productId, productId));
+  const have = new Set(existing.flatMap((v) => (v.name ? [v.name] : [])));
+  if (olds.some((o) => !have.has(o))) return { message: "Có màu không còn trong sản phẩm. Vui lòng tải lại trang." };
+
+  await db.transaction(async (tx) => {
+    // Qua tên tạm trước để đổi chỗ hai màu cho nhau không bị trùng khoá.
+    for (const [i, old] of olds.entries()) {
+      if (old === news[i]) continue;
+      const temp = `~tmp~${i}`;
+      await tx.update(productVariants).set({ colorName: temp }).where(and(eq(productVariants.productId, productId), eq(productVariants.colorName, old)));
+      await tx.update(productImages).set({ colorName: temp }).where(and(eq(productImages.productId, productId), eq(productImages.colorName, old)));
+    }
+    for (const [i, old] of olds.entries()) {
+      const from = old === news[i] ? old : `~tmp~${i}`;
+      await tx
+        .update(productVariants)
+        .set({ colorName: news[i], colorHex: hexes[i] })
+        .where(and(eq(productVariants.productId, productId), eq(productVariants.colorName, from)));
+      if (from !== news[i]) {
+        await tx
+          .update(productImages)
+          .set({ colorName: news[i] })
+          .where(and(eq(productImages.productId, productId), eq(productImages.colorName, from)));
+      }
+    }
+  });
+  touchCatalog(productId);
+  return { ok: true, message: "Đã lưu tên và mã màu." };
+}

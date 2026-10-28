@@ -9,6 +9,7 @@ import { db, schema } from "@/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { AddVariantsForm } from "@/components/admin-variant-form";
 import { ColorImageForm } from "@/components/admin-color-image-form";
+import { AdminColorsForm } from "@/components/admin-colors-form";
 import { deleteImage, deleteProduct, makeCover, updateVariants } from "../actions";
 import { SubmitButton } from "@/components/submit-button";
 
@@ -162,6 +163,15 @@ export default async function Page({ params, searchParams }: PageProps<"/admin/p
         )}
         <UploadForm productId={product.id} />
       </Card>
+
+      {colorNames.length > 0 && (
+        <Card title="Tên và mã màu">
+          <AdminColorsForm
+            productId={product.id}
+            colors={colorNames.map((name) => ({ name, hex: /^#[0-9a-f]{6}$/i.test(colorHex.get(name) ?? "") ? colorHex.get(name)! : "#cccccc" }))}
+          />
+        </Card>
+      )}
 
       <Card title="Phân loại và tồn kho">
         <form action={updateVariants}>
