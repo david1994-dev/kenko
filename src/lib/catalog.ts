@@ -59,6 +59,7 @@ export async function getProducts(): Promise<Product[]> {
     const colors = new Map<string, Color>();
     for (const v of vs) if (v.colorName) colors.set(v.colorName, { name: v.colorName, hex: v.colorHex ?? "#cccccc" });
     const sizes = [...new Set(vs.flatMap((v) => (v.size ? [v.size] : [])))];
+    const firstColor = [...colors.keys()][0];
 
     return {
       id: p.id,
@@ -79,7 +80,11 @@ export async function getProducts(): Promise<Product[]> {
       sizes,
       specs: p.specs,
       faqs: p.faqs,
-      images: images.filter((i) => i.productId === p.id).map((i) => ({ id: i.id, url: i.url, alt: i.alt })),
+      // Ảnh của màu đầu tiên đứng đầu, để thẻ sản phẩm và trang chi tiết khớp với màu mặc định.
+      images: images
+        .filter((i) => i.productId === p.id)
+        .sort((a, b) => Number(b.colorName === firstColor) - Number(a.colorName === firstColor))
+        .map((i) => ({ id: i.id, url: i.url, alt: i.alt, colorName: i.colorName })),
       variants: vs.map((v) => ({
         id: v.id,
         sku: v.sku,

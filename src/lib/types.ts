@@ -1,6 +1,6 @@
 export type Color = { name: string; hex: string };
 
-export type ProductImage = { id: string; url: string; alt: string };
+export type ProductImage = { id: string; url: string; alt: string; colorName: string | null };
 
 export type Variant = {
   id: string;

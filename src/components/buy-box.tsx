@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { QuantityStepper } from "./quantity-stepper";
 import { Spinner } from "./spinner";
 import { CheckIcon } from "./icons";
+import { useColor } from "./product-color";
 import { cart } from "@/lib/cart";
 import { currentPrice, isAvailable } from "@/lib/price";
 import type { Product } from "@/lib/types";
@@ -15,7 +16,7 @@ export function BuyBox({ product }: { product: Product }) {
   const router = useRouter();
   const { variants, colors, sizes } = product;
 
-  const [colorName, setColorName] = useState<string | null>(colors[0]?.name ?? null);
+  const { color: colorName, setColor: setColorName } = useColor();
   const [size, setSize] = useState<string | null>(sizes[Math.floor(sizes.length / 2)] ?? null);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -37,7 +38,7 @@ export function BuyBox({ product }: { product: Product }) {
         name: product.name,
         variant: label,
         price: currentPrice(product),
-        image: product.images[0]?.url,
+        image: (product.images.find((i) => i.colorName === colorName) ?? product.images[0])?.url,
       },
       qty,
     );

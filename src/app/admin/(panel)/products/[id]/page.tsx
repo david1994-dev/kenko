@@ -8,6 +8,7 @@ import { ProductForm, UploadForm } from "@/components/admin-product-forms";
 import { db, schema } from "@/db";
 import { requireAdmin } from "@/lib/admin-auth";
 import { AddVariantsForm } from "@/components/admin-variant-form";
+import { ColorImageForm } from "@/components/admin-color-image-form";
 import { deleteImage, deleteProduct, makeCover, updateVariants } from "../actions";
 import { SubmitButton } from "@/components/submit-button";
 
@@ -35,6 +36,11 @@ export default async function Page({ params, searchParams }: PageProps<"/admin/p
     db.select().from(productVariants).where(eq(productVariants.productId, id)).orderBy(asc(productVariants.sortOrder)),
     db.select().from(productImages).where(eq(productImages.productId, id)).orderBy(asc(productImages.sortOrder)),
   ]);
+
+  const colorNames = [...new Set(variants.flatMap((v) => (v.colorName ? [v.colorName] : [])))];
+  const colorHex = new Map(variants.flatMap((v) => (v.colorName ? [[v.colorName, v.colorHex ?? "#cccccc"] as const] : [])));
+  const colorImage = new Map(images.flatMap((i) => (i.colorName && colorNames.includes(i.colorName) ? [[i.colorName, i] as const] : [])));
+  const generalImages = images.filter((i) => !i.colorName || !colorNames.includes(i.colorName));
 
   return (
     <div className="space-y-4">
@@ -75,10 +81,50 @@ export default async function Page({ params, searchParams }: PageProps<"/admin/p
         />
       </Card>
 
-      <Card title={`Ảnh sản phẩm (${images.length})`}>
-        {images.length > 0 && (
+      {colorNames.length > 0 && (
+        <Card title="Ảnh theo màu">
+          <p className="mb-3 text-sm text-muted">
+            Mỗi màu có một ảnh riêng. Khách chọn màu nào thì trang sản phẩm hiện ảnh của màu đó. Tải ảnh mới sẽ thay ảnh cũ của màu.
+          </p>
+          <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+            {colorNames.map((name) => {
+              const img = colorImage.get(name);
+              return (
+                <li key={name} className="flex flex-col gap-2 rounded-xl border border-line p-3">
+                  <div className="flex items-center gap-2 text-sm font-bold">
+                    <span className="size-4 rounded-full border border-edge" style={{ background: colorHex.get(name) }} />
+                    {name}
+                  </div>
+                  <div className="relative aspect-square overflow-hidden rounded-lg bg-mist">
+                    {img ? (
+                      <Image src={img.url} alt={img.alt} fill sizes="200px" className="object-cover" />
+                    ) : (
+                      <span className="absolute inset-0 flex items-center justify-center text-xs text-subtle">Chưa có ảnh</span>
+                    )}
+                  </div>
+                  <ColorImageForm productId={product.id} colorName={name} hasImage={Boolean(img)} />
+                  {img && (
+                    <form action={deleteImage}>
+                      <input type="hidden" name="imageId" value={img.id} />
+                      <SubmitButton
+                        pendingLabel="Đang xoá…"
+                        className="h-9 w-full rounded-lg border border-edge text-xs font-semibold text-price hover:bg-[#fdeee6]"
+                      >
+                        Xoá ảnh màu này
+                      </SubmitButton>
+                    </form>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+      )}
+
+      <Card title={`Ảnh chung của sản phẩm (${generalImages.length})`}>
+        {generalImages.length > 0 && (
           <ul className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-            {images.map((img, i) => (
+            {generalImages.map((img, i) => (
               <li key={img.id} className="flex flex-col gap-2">
                 <div className="relative aspect-square overflow-hidden rounded-lg bg-mist">
                   <Image src={img.url} alt={img.alt} fill sizes="200px" className="object-cover" />

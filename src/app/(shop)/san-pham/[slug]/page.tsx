@@ -5,9 +5,11 @@ import { Suspense } from "react";
 import { PageSkeleton } from "@/components/page-skeleton";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { BuyBox } from "@/components/buy-box";
+import { ColorProvider } from "@/components/product-color";
+import { ProductGallery } from "@/components/product-gallery";
 import { ChatIcon, CheckIcon, ChevronDownIcon, GiftIcon, ShieldIcon, TruckIcon } from "@/components/icons";
 import { JsonLd } from "@/components/json-ld";
-import { Container, DiscountBadge, ImagePlaceholder, Price, ProductCard, SectionHeading } from "@/components/ui";
+import { Container, DiscountBadge, Price, ProductCard, SectionHeading } from "@/components/ui";
 import { getProduct, getProductReviews, getProducts } from "@/lib/catalog";
 import { RatingLine, Stars } from "@/components/stars";
 import { formatRating, maskName } from "@/lib/format";
@@ -73,7 +75,6 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
 
   const others = all.filter((p) => p.slug !== product.slug);
   const related = [...others.filter((p) => p.category === product.category), ...others.filter((p) => p.category !== product.category)].slice(0, 4);
-  const [main, ...rest] = product.images;
   const isShirt = product.category === "dai-tay" || product.category === "ngan-tay";
 
   return (
@@ -88,38 +89,9 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
         />
       </Container>
 
+      <ColorProvider initial={product.colors[0]?.name ?? null}>
       <Container className="grid gap-5 pt-3 md:grid-cols-2 md:gap-10 md:pt-5">
-        <div>
-          {main ? (
-            <div className="relative aspect-square w-full overflow-hidden bg-mist max-md:-mx-4 max-md:!w-[calc(100%+2rem)] md:rounded-xl">
-              <Image
-                src={main.url}
-                alt={main.alt || product.name}
-                fill
-                priority
-                sizes="(min-width: 768px) 50vw, 100vw"
-                className="object-cover"
-              />
-              <DiscountBadge product={product} />
-            </div>
-          ) : (
-            <ImagePlaceholder
-              label="Ảnh sản phẩm"
-              className="!rounded-none md:!rounded-xl max-md:-mx-4 max-md:!w-[calc(100%+2rem)]"
-            >
-              <DiscountBadge product={product} />
-            </ImagePlaceholder>
-          )}
-          {rest.length > 0 && (
-            <ul className="mt-2 grid grid-cols-5 gap-2">
-              {product.images.slice(0, 5).map((img) => (
-                <li key={img.id} className="relative aspect-square overflow-hidden rounded-lg bg-mist">
-                  <Image src={img.url} alt={img.alt || product.name} fill sizes="80px" className="object-cover" />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <ProductGallery images={product.images} name={product.name} badge={<DiscountBadge product={product} />} />
 
         <div>
           <h1 className="mb-1.5 text-[22px] font-extrabold leading-snug md:text-[28px]">{product.name}</h1>
@@ -165,6 +137,7 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
           </ul>
         </div>
       </Container>
+      </ColorProvider>
 
       <Container className="pt-6 md:pt-10">
         <div className="max-w-3xl border-t border-line">

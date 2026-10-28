@@ -91,6 +91,8 @@ export const productImages = pgTable(
       .references(() => products.id, { onDelete: "cascade" }),
     url: text("url").notNull(),
     alt: text("alt").notNull().default(""),
+    // Ảnh của một màu cụ thể; null là ảnh chung của sản phẩm.
+    colorName: text("color_name"),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: createdAt(),
   },

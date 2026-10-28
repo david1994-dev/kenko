@@ -328,3 +328,47 @@ export async function deleteProduct(data: FormData) {
   revalidatePath("/admin/products");
   redirect("/admin/products?deleted=1");
 }
+
+// Mỗi màu có đúng một ảnh: tải ảnh mới sẽ thay ảnh cũ của màu đó.
+export async function uploadColorImage(_prev: FormState, data: FormData): Promise<FormState> {
+  await requireAdmin();
+  const productId = z.uuid().parse(data.get("productId"));
+  const colorName = String(data.get("colorName") ?? "");
+  const file = data.get("image");
+  if (!(file instanceof File) || file.size === 0) return { message: "Chưa chọn ảnh." };
+
+  const [product] = await db.select({ slug: products.slug, name: products.name }).from(products).where(eq(products.id, productId));
+  if (!product) return { message: "Không tìm thấy sản phẩm." };
+  const [hasColor] = await db
+    .select({ id: productVariants.id })
+    .from(productVariants)
+    .where(and(eq(productVariants.productId, productId), eq(productVariants.colorName, colorName)))
+    .limit(1);
+  if (!hasColor) return { message: "Màu này không có trong sản phẩm." };
+
+  let url: string;
+  try {
+    url = await saveImage(file, product.slug);
+  } catch (e) {
+    return { message: e instanceof Error ? e.message : "Không tải được ảnh." };
+  }
+
+  const old = await db
+    .delete(productImages)
+    .where(and(eq(productImages.productId, productId), eq(productImages.colorName, colorName)))
+    .returning({ url: productImages.url });
+  const [{ next }] = await db
+    .select({ next: sql<number>`coalesce(max(${productImages.sortOrder}), -1) + 1` })
+    .from(productImages)
+    .where(eq(productImages.productId, productId));
+  await db.insert(productImages).values({
+    productId,
+    url,
+    alt: `${product.name} - ${colorName}`,
+    colorName,
+    sortOrder: next,
+  });
+  await Promise.all(old.map((o) => removeImage(o.url)));
+  touchCatalog(productId);
+  return { ok: true, message: "Đã lưu ảnh cho màu này." };
+}
