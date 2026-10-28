@@ -3,7 +3,8 @@ import { RichTextEditor } from "./rich-text-editor";
 import { descriptionToHtml } from "@/lib/rich-text";
 import { Spinner } from "./spinner";
 
-import { useActionState } from "react";
+import { useActionState, useState, useTransition } from "react";
+import { shrinkImage } from "@/lib/shrink-image";
 import { updateProduct, uploadImages, type FormState } from "@/app/admin/(panel)/products/actions";
 
 const input = "h-12 w-full rounded-lg border border-edge bg-white px-3 text-base outline-none focus:border-teal";
@@ -116,10 +117,47 @@ export function ProductForm({
   );
 }
 
+const MAX_TOTAL_BYTES = 3.8 * 1024 * 1024;
+
 export function UploadForm({ productId }: { productId: string }) {
-  const [state, action, pending] = useActionState<FormState, FormData>(uploadImages, {});
+  const [state, action, actionPending] = useActionState<FormState, FormData>(uploadImages, {});
+  const [, startTransition] = useTransition();
+  const [preparing, setPreparing] = useState(false);
+  const [localError, setLocalError] = useState<string>();
+  const pending = actionPending || preparing;
+
+  // Ảnh gốc nặng bao nhiêu cũng chọn được: thu nhỏ trong trình duyệt trước khi gửi (máy chủ nhận tối đa khoảng 4 MB mỗi lần).
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLocalError(undefined);
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const files = fd.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+    fd.delete("files");
+    if (files.length === 0) {
+      setLocalError("Chưa chọn ảnh.");
+      return;
+    }
+    setPreparing(true);
+    try {
+      const small = await Promise.all(files.map((f) => shrinkImage(f, 1600, 0.85)));
+      if (small.reduce((n, f) => n + f.size, 0) > MAX_TOTAL_BYTES) {
+        setLocalError("Tổng ảnh vẫn quá lớn cho một lần tải. Vui lòng chọn ít ảnh hơn mỗi lần.");
+        return;
+      }
+      small.forEach((f) => fd.append("files", f));
+    } catch {
+      setLocalError("Không đọc được ảnh. Vui lòng chọn ảnh JPG, PNG hoặc WebP.");
+      return;
+    } finally {
+      setPreparing(false);
+    }
+    startTransition(() => action(fd));
+    form.reset();
+  }
+
   return (
-    <form action={action} className="flex flex-col gap-3">
+    <form onSubmit={onSubmit} className="flex flex-col gap-3">
       <input type="hidden" name="productId" value={productId} />
       <div>
         <label htmlFor="files" className="mb-1 block text-sm font-semibold">Chọn ảnh (JPG, PNG, WebP)</label>
@@ -127,13 +165,13 @@ export function UploadForm({ productId }: { productId: string }) {
           id="files"
           name="files"
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="image/*"
           multiple
           className="block w-full text-sm file:mr-3 file:h-11 file:rounded-lg file:border-0 file:bg-mist file:px-4 file:font-semibold file:text-navy"
         />
-        <p className="mt-1 text-xs text-subtle">Tổng dung lượng mỗi lần tải tối đa 4 MB. Nên nén ảnh trước, rộng khoảng 1200px.</p>
+        <p className="mt-1 text-xs text-subtle">Ảnh gốc nặng bao nhiêu cũng được, hệ thống tự thu nhỏ (cạnh dài tối đa 1600px) trước khi tải lên.</p>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="submit"
           disabled={pending}
@@ -142,7 +180,13 @@ export function UploadForm({ productId }: { productId: string }) {
           {pending && <Spinner />}
           {pending ? "Đang tải lên…" : "Tải ảnh lên"}
         </button>
-        <Message state={state} />
+        {localError ? (
+          <p role="alert" className="text-sm font-semibold text-price">
+            {localError}
+          </p>
+        ) : (
+          <Message state={state} />
+        )}
       </div>
     </form>
   );
