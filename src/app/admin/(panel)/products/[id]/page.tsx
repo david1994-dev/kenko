@@ -7,7 +7,8 @@ import { Card } from "@/components/admin-ui";
 import { ProductForm, UploadForm } from "@/components/admin-product-forms";
 import { db, schema } from "@/db";
 import { requireAdmin } from "@/lib/admin-auth";
-import { deleteImage, makeCover, updateVariants } from "../actions";
+import { AddVariantsForm } from "@/components/admin-variant-form";
+import { deleteImage, deleteProduct, makeCover, updateVariants } from "../actions";
 import { SubmitButton } from "@/components/submit-button";
 
 export const instant = false;
@@ -26,6 +27,10 @@ export default async function Page({ params, searchParams }: PageProps<"/admin/p
   const [product] = await db.select().from(products).where(eq(products.id, id));
   if (!product) notFound();
 
+  const categoryRows = await db.select().from(schema.categories).orderBy(asc(schema.categories.sortOrder));
+  const parentIds = new Set(categoryRows.flatMap((c) => (c.parentId ? [c.parentId] : [])));
+  const categories = categoryRows.filter((c) => !parentIds.has(c.id)).map((c) => ({ id: c.id, name: c.name }));
+
   const [variants, images] = await Promise.all([
     db.select().from(productVariants).where(eq(productVariants.productId, id)).orderBy(asc(productVariants.sortOrder)),
     db.select().from(productImages).where(eq(productImages.productId, id)).orderBy(asc(productImages.sortOrder)),
@@ -36,7 +41,14 @@ export default async function Page({ params, searchParams }: PageProps<"/admin/p
       <Link href="/admin/products" className="text-sm font-semibold text-navy underline">
         ← Danh sách sản phẩm
       </Link>
-      <h1 className="text-2xl font-extrabold">{product.name}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-extrabold">{product.name}</h1>
+        {product.status === "active" && (
+          <Link href={`/san-pham/${product.slug}`} className="text-sm font-semibold text-navy underline">
+            Xem trên web
+          </Link>
+        )}
+      </div>
       {created && (
         <p role="status" className="rounded-lg bg-mist p-3 text-sm font-semibold text-navy">
           Đã tạo sản phẩm. Thêm ảnh ở mục bên dưới
@@ -48,6 +60,7 @@ export default async function Page({ params, searchParams }: PageProps<"/admin/p
         <ProductForm
           product={{
             id: product.id,
+            categoryId: product.categoryId,
             name: product.name,
             sku: product.sku,
             summary: product.summary,
@@ -58,6 +71,7 @@ export default async function Page({ params, searchParams }: PageProps<"/admin/p
             giftNote: product.giftNote,
             status: product.status,
           }}
+          categories={categories}
         />
       </Card>
 
@@ -115,6 +129,7 @@ export default async function Page({ params, searchParams }: PageProps<"/admin/p
                   <th className="py-2">Size</th>
                   <th className="py-2">Tồn kho</th>
                   <th className="py-2">Đang bán</th>
+                  <th className="py-2">Xoá</th>
                 </tr>
               </thead>
               <tbody>
@@ -143,12 +158,20 @@ export default async function Page({ params, searchParams }: PageProps<"/admin/p
                         className="size-5 accent-navy"
                       />
                     </td>
+                    <td className="py-2">
+                      <input
+                        name={`remove-${v.id}`}
+                        type="checkbox"
+                        aria-label={`Xoá phân loại ${v.sku}`}
+                        className="size-5 accent-[#c2410c]"
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="mt-2 text-xs text-subtle">Để trống tồn kho nếu không muốn theo dõi số lượng. Khi nhập số, hệ thống tự trừ theo đơn hàng.</p>
+          <p className="mt-2 text-xs text-subtle">Để trống tồn kho nếu không muốn theo dõi số lượng. Khi nhập số, hệ thống tự trừ theo đơn hàng. Tick cột Xoá rồi bấm Lưu để bỏ một phân loại (luôn giữ lại ít nhất một).</p>
           <SubmitButton
             pendingLabel="Đang lưu…"
             className="mt-3 h-12 rounded-lg bg-cta px-6 font-bold text-white hover:bg-cta-dark"
@@ -156,6 +179,28 @@ export default async function Page({ params, searchParams }: PageProps<"/admin/p
             Lưu phân loại
           </SubmitButton>
         </form>
+      </Card>
+
+      <Card title="Thêm màu hoặc size mới">
+        <AddVariantsForm productId={product.id} />
+      </Card>
+
+      <Card title="Xoá sản phẩm">
+        <p className="mb-3 text-sm text-muted">
+          Xoá hẳn sản phẩm này cùng ảnh, phân loại và đánh giá của nó. Đơn hàng đã đặt vẫn giữ nguyên tên và giá. Không hoàn lại được.
+          Nếu chỉ muốn ngừng bán, hãy đổi trạng thái sang <strong>Ẩn</strong> ở mục Thông tin.
+        </p>
+        <details>
+          <summary className="flex h-11 w-fit cursor-pointer items-center rounded-lg border border-edge px-4 text-sm font-semibold text-price">
+            Xoá sản phẩm này
+          </summary>
+          <form action={deleteProduct} className="mt-3">
+            <input type="hidden" name="id" value={product.id} />
+            <SubmitButton pendingLabel="Đang xoá…" className="h-12 rounded-lg bg-price px-6 font-bold text-white">
+              Xác nhận xoá “{product.name}”
+            </SubmitButton>
+          </form>
+        </details>
       </Card>
     </div>
   );

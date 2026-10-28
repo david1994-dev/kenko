@@ -17,6 +17,7 @@ function Message({ state }: { state: FormState }) {
 
 export type ProductFormValues = {
   id: string;
+  categoryId: number;
   name: string;
   sku: string;
   summary: string;
@@ -28,7 +29,13 @@ export type ProductFormValues = {
   status: string;
 };
 
-export function ProductForm({ product }: { product: ProductFormValues }) {
+export function ProductForm({
+  product,
+  categories,
+}: {
+  product: ProductFormValues;
+  categories: { id: number; name: string }[];
+}) {
   const [state, action, pending] = useActionState<FormState, FormData>(updateProduct, {});
   return (
     <form action={action} className="grid gap-3 md:grid-cols-2">
@@ -36,6 +43,16 @@ export function ProductForm({ product }: { product: ProductFormValues }) {
       <div className="md:col-span-2">
         <label htmlFor="name" className="mb-1 block text-sm font-semibold">Tên sản phẩm</label>
         <input id="name" name="name" defaultValue={product.name} required className={input} />
+      </div>
+      <div className="md:col-span-2">
+        <label htmlFor="categoryId" className="mb-1 block text-sm font-semibold">Danh mục</label>
+        <select id="categoryId" name="categoryId" defaultValue={product.categoryId} className={input}>
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <label htmlFor="price" className="mb-1 block text-sm font-semibold">Giá gốc (₫)</label>

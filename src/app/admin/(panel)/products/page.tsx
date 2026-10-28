@@ -12,8 +12,9 @@ export const metadata: Metadata = { title: "Sản phẩm" };
 
 const statusText = { active: "Đang bán", draft: "Nháp", hidden: "Ẩn" } as const;
 
-export default async function Page() {
+export default async function Page({ searchParams }: PageProps<"/admin/products">) {
   await requireAdmin();
+  const deleted = (await searchParams).deleted === "1";
   const { products, categories, productImages } = schema;
 
   const rows = await db
@@ -42,6 +43,11 @@ export default async function Page() {
           + Thêm sản phẩm
         </Link>
       </div>
+      {deleted && (
+        <p role="status" className="rounded-lg bg-mist p-3 text-sm font-semibold text-navy">
+          Đã xoá sản phẩm.
+        </p>
+      )}
       <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-line">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="bg-ground text-xs uppercase tracking-wide text-subtle">

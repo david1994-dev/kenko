@@ -22,6 +22,7 @@ const intOrNull = (v: unknown) => {
 const productSchema = z
   .object({
     id: z.uuid(),
+    categoryId: z.coerce.number().int("Vui lòng chọn danh mục.").positive("Vui lòng chọn danh mục."),
     name: z.string().trim().min(2, "Tên sản phẩm quá ngắn.").max(200),
     sku: z.string().trim().max(60),
     summary: z.string().trim().max(500),
@@ -47,6 +48,7 @@ export async function updateProduct(_prev: FormState, data: FormData): Promise<F
   await requireAdmin();
   const parsed = productSchema.safeParse({
     id: data.get("id"),
+    categoryId: data.get("categoryId"),
     name: data.get("name"),
     sku: data.get("sku") ?? "",
     summary: data.get("summary") ?? "",
@@ -74,8 +76,16 @@ export async function updateVariants(data: FormData) {
     .from(productVariants)
     .where(eq(productVariants.productId, productId));
 
+  // Giữ lại ít nhất một phân loại, nếu không sản phẩm không mua được.
+  const toRemove = rows.filter((r) => data.get(`remove-${r.id}`) === "on");
+  const removeIds = new Set(toRemove.length < rows.length ? toRemove.map((r) => r.id) : []);
+
   await db.transaction(async (tx) => {
     for (const { id } of rows) {
+      if (removeIds.has(id)) {
+        await tx.delete(productVariants).where(eq(productVariants.id, id));
+        continue;
+      }
       const stock = intOrNull(data.get(`stock-${id}`));
       if (stock !== null && (!Number.isInteger(stock) || stock < 0)) continue;
       await tx
@@ -163,6 +173,28 @@ const createSchema = z
 const HEX = /^#[0-9a-f]{6}$/i;
 const MAX_OPTIONS = 12;
 
+function parseOptions(data: FormData): { colors: { name: string; hex: string }[]; sizes: string[] } | { error: string } {
+  const names = data.getAll("colorName").map((v) => String(v).trim());
+  const hexes = data.getAll("colorHex").map(String);
+  const colors: { name: string; hex: string }[] = [];
+  names.forEach((name, i) => {
+    if (!name || colors.some((c) => c.name.toLowerCase() === name.toLowerCase())) return;
+    colors.push({ name: name.slice(0, 40), hex: HEX.test(hexes[i] ?? "") ? hexes[i] : "#cccccc" });
+  });
+
+  const sizes = [
+    ...new Set(
+      [...data.getAll("size").map(String), ...String(data.get("sizeExtra") ?? "").split(",")]
+        .map((v) => v.trim().toUpperCase().slice(0, 12))
+        .filter(Boolean),
+    ),
+  ];
+  if (colors.length > MAX_OPTIONS || sizes.length > MAX_OPTIONS) {
+    return { error: `Tối đa ${MAX_OPTIONS} màu và ${MAX_OPTIONS} size cho mỗi lần thêm.` };
+  }
+  return { colors, sizes };
+}
+
 export async function createProduct(_prev: FormState, data: FormData): Promise<FormState> {
   await requireAdmin();
 
@@ -180,24 +212,9 @@ export async function createProduct(_prev: FormState, data: FormData): Promise<F
   });
   if (!parsed.success) return { message: parsed.error.issues[0].message };
 
-  const names = data.getAll("colorName").map((v) => String(v).trim());
-  const hexes = data.getAll("colorHex").map(String);
-  const colors: { name: string; hex: string }[] = [];
-  names.forEach((name, i) => {
-    if (!name || colors.some((c) => c.name.toLowerCase() === name.toLowerCase())) return;
-    colors.push({ name: name.slice(0, 40), hex: HEX.test(hexes[i] ?? "") ? hexes[i] : "#cccccc" });
-  });
-
-  const sizes = [
-    ...new Set(
-      [...data.getAll("size").map(String), ...String(data.get("sizeExtra") ?? "").split(",")]
-        .map((s) => s.trim().toUpperCase().slice(0, 12))
-        .filter(Boolean),
-    ),
-  ];
-  if (colors.length > MAX_OPTIONS || sizes.length > MAX_OPTIONS) {
-    return { message: `Tối đa ${MAX_OPTIONS} màu và ${MAX_OPTIONS} size cho mỗi sản phẩm.` };
-  }
+  const options = parseOptions(data);
+  if ("error" in options) return { message: options.error };
+  const { colors, sizes } = options;
 
   const { categoryId, ...values } = parsed.data;
   const [category] = await db.select({ id: schema.categories.id }).from(schema.categories).where(eq(schema.categories.id, categoryId));
@@ -245,4 +262,69 @@ export async function createProduct(_prev: FormState, data: FormData): Promise<F
   updateTag("catalog");
   revalidatePath("/admin/products");
   redirect(`/admin/products/${id}?created=1`);
+}
+
+export async function addVariants(_prev: FormState, data: FormData): Promise<FormState> {
+  await requireAdmin();
+  const productId = z.uuid().parse(data.get("productId"));
+  const options = parseOptions(data);
+  if ("error" in options) return { message: options.error };
+  if (options.colors.length === 0 && options.sizes.length === 0) {
+    return { message: "Hãy thêm ít nhất một màu hoặc một size." };
+  }
+
+  const [product] = await db.select({ sku: products.sku, slug: products.slug }).from(products).where(eq(products.id, productId));
+  if (!product) return { message: "Không tìm thấy sản phẩm." };
+  const base = product.sku || product.slug;
+
+  const existing = await db.select().from(productVariants).where(eq(productVariants.productId, productId));
+  const colorMap = new Map<string, string | null>();
+  for (const v of existing) if (v.colorName) colorMap.set(v.colorName, v.colorHex);
+  for (const c of options.colors) if (!colorMap.has(c.name)) colorMap.set(c.name, c.hex);
+  const allSizes = [...new Set([...existing.flatMap((v) => (v.size ? [v.size] : [])), ...options.sizes])];
+
+  // Điền đủ bảng màu x size: màu mới ghép với mọi size, size mới ghép với mọi màu.
+  const colorOptions = colorMap.size ? [...colorMap.entries()] : [null];
+  const sizeOptions = allSizes.length ? allSizes : [null];
+  let order = existing.reduce((m, v) => Math.max(m, v.sortOrder), -1) + 1;
+
+  const rows = colorOptions.flatMap((color) =>
+    sizeOptions.map((size) => ({
+      productId,
+      sku: [base, color && slugify(color[0]), size && slugify(size)].filter(Boolean).join("-"),
+      colorName: color?.[0] ?? null,
+      colorHex: color?.[1] ?? null,
+      size,
+    })),
+  );
+  const have = new Set(existing.map((v) => `${v.colorName ?? ""}|${v.size ?? ""}`));
+  const fresh = rows.filter((r) => !have.has(`${r.colorName ?? ""}|${r.size ?? ""}`)).map((r) => ({ ...r, sortOrder: order++ }));
+  if (fresh.length === 0) return { message: "Các phân loại này đã có rồi." };
+
+  await db.transaction(async (tx) => {
+    await tx.insert(productVariants).values(fresh).onConflictDoNothing();
+    // Phân loại "không màu, không size" ban đầu không còn cần khi đã có màu hoặc size.
+    const blank = existing.find((v) => !v.colorName && !v.size);
+    if (blank) await tx.delete(productVariants).where(eq(productVariants.id, blank.id));
+  });
+  touchCatalog(productId);
+  return { ok: true, message: `Đã thêm ${fresh.length} phân loại.` };
+}
+
+export async function deleteProduct(data: FormData) {
+  await requireAdmin();
+  const id = z.uuid().parse(data.get("id"));
+
+  const [images, reviewImages] = await Promise.all([
+    db.select({ url: productImages.url }).from(productImages).where(eq(productImages.productId, id)),
+    db.select({ images: schema.productReviews.images }).from(schema.productReviews).where(eq(schema.productReviews.productId, id)),
+  ]);
+
+  // Phân loại, ảnh và đánh giá xoá theo; đơn hàng cũ vẫn giữ tên và giá đã lưu.
+  await db.delete(products).where(eq(products.id, id));
+
+  await Promise.all([...images.map((i) => i.url), ...reviewImages.flatMap((r) => r.images)].map(removeImage));
+  updateTag("catalog");
+  revalidatePath("/admin/products");
+  redirect("/admin/products?deleted=1");
 }
