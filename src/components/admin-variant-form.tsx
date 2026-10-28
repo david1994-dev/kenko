@@ -26,7 +26,7 @@ export function AddVariantsForm({ productId }: { productId: string }) {
           className="inline-flex h-12 items-center gap-2 rounded-lg border-2 border-navy px-6 font-bold text-navy hover:bg-mist disabled:opacity-60"
         >
           {pending && <Spinner />}
-          {pending ? "Đang thêm…" : "Thêm phân loại"}
+          {pending ? "Đang lưu…" : "Lưu phân loại"}
         </button>
         {state.message && (
           <p role="status" className={`text-sm font-semibold ${state.ok ? "text-[#14532d]" : "text-price"}`}>
