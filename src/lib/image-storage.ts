@@ -20,7 +20,7 @@ function sniff(bytes: Uint8Array): string | null {
   return null;
 }
 
-export async function saveImage(file: File, slug: string, folder: "products" | "reviews" = "products"): Promise<string> {
+export async function saveImage(file: File, slug: string, folder: "products" | "reviews" | "banners" = "products"): Promise<string> {
   if (file.size > MAX_IMAGE_BYTES) throw new Error(`${file.name}: ảnh lớn hơn 4 MB.`);
   const buffer = new Uint8Array(await file.arrayBuffer());
   const type = sniff(buffer);

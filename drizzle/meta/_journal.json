@@ -43,6 +43,13 @@
       "when": 1793096520757,
       "tag": "0005_strange_moondragon",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793155094694,
+      "tag": "0006_furry_warbound",
+      "breakpoints": true
     }
   ]
 }

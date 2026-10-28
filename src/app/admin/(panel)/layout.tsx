@@ -23,6 +23,9 @@ export default function PanelLayout({ children }: LayoutProps<"/admin">) {
             <Link href="/admin/reviews" className="flex min-h-11 items-center hover:underline">
               Đánh giá
             </Link>
+            <Link href="/admin/banner" className="flex min-h-11 items-center hover:underline">
+              Banner
+            </Link>
           </nav>
           <form action={logout}>
             <SubmitButton pendingLabel="Đang thoát…" className="min-h-11 text-sm font-semibold hover:underline">

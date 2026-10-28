@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useActionState, useState, useTransition } from "react";
 import { saveReview, type ReviewFormState } from "@/app/admin/(panel)/reviews/actions";
 import { sourceOptions } from "@/lib/review-source";
+import { shrinkImage as shrink } from "@/lib/shrink-image";
 import { Spinner } from "./spinner";
 import { Star } from "./stars";
 
@@ -20,19 +21,6 @@ export type ReviewFormValues = {
 
 const MAX_TOTAL_BYTES = 3.8 * 1024 * 1024;
 
-// Thu nhỏ ảnh trước khi gửi: ảnh chụp điện thoại thường vài MB, vượt giới hạn 4 MB của máy chủ.
-async function shrink(file: File): Promise<File> {
-  if (file.type === "image/jpeg" && file.size <= 400_000) return file;
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 1280 / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.round(bitmap.width * scale);
-  canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/jpeg", 0.82));
-  if (!blob) throw new Error("toBlob");
-  return new File([blob], `${file.name.replace(/\.\w+$/, "")}.jpg`, { type: "image/jpeg" });
-}
 
 const field = "h-12 w-full rounded-lg border border-edge bg-white px-3 text-base outline-none focus:border-teal";
 
@@ -87,7 +75,7 @@ export function AdminReviewForm({
     if (files.length > 0) {
       setPreparing(true);
       try {
-        const small = await Promise.all(files.map(shrink));
+        const small = await Promise.all(files.map((f) => shrink(f)));
         if (small.reduce((n, f) => n + f.size, 0) > MAX_TOTAL_BYTES) {
           setLocalError("Ảnh quá lớn, vui lòng chọn ít ảnh hơn mỗi lần.");
           return;

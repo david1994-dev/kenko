@@ -187,3 +187,10 @@ export const productReviews = pgTable(
     check("product_reviews_rating_range", sql`${t.rating} between 1 and 5`),
   ],
 );
+
+// Cài đặt dạng khoá-giá trị, ví dụ ảnh banner trang chủ.
+export const siteSettings = pgTable("site_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

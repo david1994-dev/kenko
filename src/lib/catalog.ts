@@ -4,7 +4,7 @@ import { cacheLife, cacheTag } from "next/cache";
 import { db, schema } from "@/db";
 import type { Category, Color, Product, Review } from "./types";
 
-const { categories, products, productVariants, productImages, productReviews } = schema;
+const { categories, products, productVariants, productImages, productReviews, siteSettings } = schema;
 
 export async function getCategories(): Promise<Category[]> {
   "use cache";
@@ -130,4 +130,15 @@ export async function getProductReviews(productId: string): Promise<Review[]> {
     source: r.source,
     reviewedAt: r.reviewedAt.toISOString(),
   }));
+}
+
+export async function getHeroBanner(): Promise<{ url: string; alt: string } | null> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("catalog");
+
+  const rows = await db.select().from(siteSettings);
+  const map = new Map(rows.map((r) => [r.key, r.value]));
+  const url = map.get("hero_image");
+  return url ? { url, alt: map.get("hero_alt") || "" } : null;
 }
