@@ -92,7 +92,7 @@ async function Content({ params }: Pick<PageProps<"/san-pham/[slug]">, "params">
 
       <ColorProvider initial={product.colors[0]?.name ?? null}>
       <Container className="grid gap-5 pt-3 md:grid-cols-2 md:gap-10 md:pt-5">
-        <ProductGallery images={product.images} name={product.name} badge={<DiscountBadge product={product} />} />
+        <ProductGallery images={product.images} colorNames={product.colors.map((c) => c.name)} name={product.name} badge={<DiscountBadge product={product} />} />
 
         <div>
           <h1 className="mb-1.5 text-[22px] font-extrabold leading-snug md:text-[28px]">{product.name}</h1>

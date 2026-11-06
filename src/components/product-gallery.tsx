@@ -8,19 +8,24 @@ import type { ProductImage } from "@/lib/types";
 
 export function ProductGallery({
   images,
+  colorNames,
   name,
   badge,
 }: {
   images: ProductImage[];
+  colorNames: string[];
   name: string;
   badge?: React.ReactNode;
 }) {
   const { color } = useColor();
   const [pick, setPick] = useState<{ color: string | null; id: string } | null>(null);
 
+  // Ảnh nhỏ bên dưới chỉ là ảnh chung của sản phẩm; ảnh theo màu chỉ hiện ở ảnh lớn khi chọn màu.
+  const general = images.filter((i) => !i.colorName || !colorNames.includes(i.colorName));
   const chosen = pick && pick.color === color ? images.find((i) => i.id === pick.id) : undefined;
   const forColor = color ? images.find((i) => i.colorName === color) : undefined;
-  const main = chosen ?? forColor ?? images[0];
+  const main = chosen ?? forColor ?? general[0] ?? images[0];
+  const showThumbs = general.length > 1 || (general.length === 1 && main?.id !== general[0].id);
 
   return (
     <div>
@@ -45,14 +50,14 @@ export function ProductGallery({
           {badge}
         </ImagePlaceholder>
       )}
-      {images.length > 1 && (
+      {showThumbs && (
         <ul className="mt-2 grid grid-cols-5 gap-2">
-          {images.slice(0, 10).map((img, i) => (
+          {general.slice(0, 10).map((img, i) => (
             <li key={img.id}>
               <button
                 type="button"
                 onClick={() => setPick({ color, id: img.id })}
-                aria-label={img.colorName ? `Xem ảnh màu ${img.colorName}` : `Xem ảnh ${i + 1}`}
+                aria-label={`Xem ảnh ${i + 1}`}
                 aria-pressed={img.id === main?.id}
                 className={`relative block aspect-square w-full overflow-hidden rounded-lg bg-mist ring-2 ${
                   img.id === main?.id ? "ring-navy" : "ring-transparent"
