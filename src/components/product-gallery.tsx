@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 import { ImagePlaceholder } from "./ui";
 import { useColor } from "./product-color";
 import type { ProductImage } from "@/lib/types";
@@ -17,12 +16,11 @@ export function ProductGallery({
   name: string;
   badge?: React.ReactNode;
 }) {
-  const { color } = useColor();
-  const [pick, setPick] = useState<{ color: string | null; id: string } | null>(null);
+  const { color, pickedId, setPickedId } = useColor();
 
   // Ảnh nhỏ bên dưới chỉ là ảnh chung của sản phẩm; ảnh theo màu chỉ hiện ở ảnh lớn khi chọn màu.
   const general = images.filter((i) => !i.colorName || !colorNames.includes(i.colorName));
-  const chosen = pick && pick.color === color ? images.find((i) => i.id === pick.id) : undefined;
+  const chosen = pickedId ? images.find((i) => i.id === pickedId) : undefined;
   const forColor = color ? images.find((i) => i.colorName === color) : undefined;
   const main = chosen ?? forColor ?? general[0] ?? images[0];
   const showThumbs = general.length > 1 || (general.length === 1 && main?.id !== general[0].id);
@@ -56,11 +54,11 @@ export function ProductGallery({
             <li key={img.id}>
               <button
                 type="button"
-                onClick={() => setPick({ color, id: img.id })}
+                onClick={() => setPickedId(img.id)}
                 aria-label={`Xem ảnh ${i + 1}`}
-                aria-pressed={img.id === main?.id}
+                aria-pressed={img.id === pickedId}
                 className={`relative block aspect-square w-full overflow-hidden rounded-lg bg-mist ring-2 ${
-                  img.id === main?.id ? "ring-navy" : "ring-transparent"
+                  img.id === pickedId ? "ring-navy" : "ring-transparent"
                 }`}
               >
                 <Image src={img.url} alt="" fill sizes="80px" className="object-cover" />

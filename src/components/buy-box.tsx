@@ -17,7 +17,7 @@ export function BuyBox({ product }: { product: Product }) {
   const router = useRouter();
   const { variants, colors, sizes } = product;
 
-  const { color: colorName, setColor: setColorName } = useColor();
+  const { color: colorName, setColor: setColorName, pickedId } = useColor();
   const [size, setSize] = useState<string | null>(sizes[Math.floor(sizes.length / 2)] ?? null);
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -75,10 +75,10 @@ export function BuyBox({ product }: { product: Product }) {
                 key={c.name}
                 type="button"
                 aria-label={c.name}
-                aria-pressed={c.name === colorName}
+                aria-pressed={c.name === colorName && !pickedId}
                 onClick={() => setColorName(c.name)}
                 className={`flex size-11 items-center justify-center rounded-full border-2 bg-white p-[3px] ${
-                  c.name === colorName ? "border-navy" : "border-line"
+                  c.name === colorName && !pickedId ? "border-navy" : "border-line"
                 }`}
               >
                 {product.images.find((i) => i.colorName === c.name) ? (
